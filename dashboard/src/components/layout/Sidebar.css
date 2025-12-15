@@ -1,0 +1,147 @@
+.sidebar {
+  background: #1a202c;
+  border-right: 1px solid #2d3748;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-open {
+  width: 260px;
+}
+
+.sidebar-closed {
+  width: 70px;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  display: none;
+}
+
+.sidebar-header {
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid #2d3748;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sidebar-toggle {
+  background: #4299e1;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: 8px;
+  color: white;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.sidebar-toggle:hover {
+  background: #3182ce;
+  transform: translateY(-1px);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1.5rem 0;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  gap: 0.875rem;
+  border-radius: 8px;
+  position: relative;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.nav-link:hover {
+  background: #2d3748;
+  color: #e2e8f0;
+  transform: translateX(2px);
+}
+
+.nav-link-active {
+  background: #4299e1;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+}
+
+.nav-link-active::before {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: #4299e1;
+  border-radius: 2px;
+}
+
+.nav-icon {
+  font-size: 1.125rem;
+  min-width: 1.25rem;
+  text-align: center;
+}
+
+.nav-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar-open {
+    transform: translateX(0);
+    width: 260px;
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .sidebar-closed {
+    transform: translateX(-100%);
+  }
+}
+
+/* Tablet responsive */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .sidebar-closed {
+    width: 70px;
+  }
+}
