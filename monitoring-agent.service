@@ -1,0 +1,40 @@
+[Unit]
+Description=Linux Server Health Monitoring Agent
+Documentation=https://github.com/your-org/linux-server-monitoring
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=monitoring
+Group=monitoring
+ExecStart=/opt/monitoring-agent/agent
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=monitoring-agent
+
+# Environment configuration
+Environment=MONITORING_CONFIG_FILE=/etc/monitoring-agent/config.yaml
+EnvironmentFile=-/etc/monitoring-agent/environment
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/monitoring-agent /var/lib/monitoring-agent
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Working directory
+WorkingDirectory=/opt/monitoring-agent
+
+[Install]
+WantedBy=multi-user.target

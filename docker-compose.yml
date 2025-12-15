@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: monitoring_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-monitoring}
+      POSTGRES_USER: ${POSTGRES_USER:-monitoring_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-monitoring_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-monitoring_user} -d ${POSTGRES_DB:-monitoring}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: monitoring_server
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-monitoring_user}:${POSTGRES_PASSWORD:-monitoring_pass}@postgres:5432/${POSTGRES_DB:-monitoring}
+      SERVER_HOST: ${SERVER_HOST:-0.0.0.0}
+      SERVER_PORT: ${SERVER_PORT:-8000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ALERT_CPU_THRESHOLD: ${ALERT_CPU_THRESHOLD:-90.0}
+      ALERT_DISK_THRESHOLD: ${ALERT_DISK_THRESHOLD:-80.0}
+      ALERT_OFFLINE_TIMEOUT: ${ALERT_OFFLINE_TIMEOUT:-300}
+      WEBHOOK_URLS: ${WEBHOOK_URLS:-}
+      RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-100}
+      RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-60}
+    ports:
+      - "${SERVER_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  monitoring_network:
+    driver: bridge

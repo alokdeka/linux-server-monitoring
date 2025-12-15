@@ -1,0 +1,40 @@
+# Linux Server Health Monitoring Agent Configuration
+
+# Server connection settings
+server:
+  url: "http://localhost:8000" # Change to your monitoring server URL
+  api_key: "" # Set your API key here or use environment variable MONITORING_API_KEY
+  timeout: 30 # Request timeout in seconds
+  verify_ssl: true # Set to false for self-signed certificates
+
+# Collection settings
+collection:
+  interval: 60 # Collection interval in seconds
+  enabled_metrics:
+    - cpu
+    - memory
+    - disk
+    - load_average
+    - uptime
+    - systemd_services
+
+# Retry settings
+retry:
+  max_attempts: 3
+  backoff_factor: 2.0 # Exponential backoff multiplier
+  max_delay: 300 # Maximum retry delay in seconds
+
+# Logging settings
+logging:
+  level: INFO # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "/var/log/monitoring-agent/agent.log"
+  max_size: 10485760 # 10MB
+  backup_count: 5
+
+# System settings
+system:
+  hostname_override: "" # Override system hostname if needed
+  tags: # Optional tags for server identification
+    environment: "production"
+    datacenter: "us-east-1"
+    role: "web-server"

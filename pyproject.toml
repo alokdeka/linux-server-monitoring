@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linux-server-monitoring"
+version = "1.0.0"
+description = "A lightweight, secure Linux server health monitoring system"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Linux Server Monitoring Team"}
+]
+keywords = ["monitoring", "linux", "server", "health", "metrics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Systems Administration",
+]
+
+dependencies = [
+    "psutil>=5.9.0",
+    "pyyaml>=6.0",
+    "requests>=2.28.0",
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "sqlalchemy>=2.0.0",
+    "psycopg2-binary>=2.9.0",
+    "alembic>=1.12.0",
+    "cryptography>=41.0.0",
+    "passlib>=1.7.4",
+    "python-jose>=3.3.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "hypothesis>=6.88.0",
+    "httpx>=0.25.0",
+]
+dev = [
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.6.0",
+]
+packaging = [
+    "pyinstaller>=6.0.0",
+]
+
+[project.scripts]
+monitoring-agent = "agent.main:main"
+monitoring-server = "server.main:main"
+
+[tool.setuptools.packages.find]
+include = ["agent*", "server*", "shared*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
