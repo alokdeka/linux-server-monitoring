@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../services/api';
 import type { Server } from '../types';
+import ConfirmationModal from '../components/common/ConfirmationModal';
 import './ServerManagement.css';
 
 interface ApiKeyInfo {
@@ -16,8 +17,20 @@ const ServerManagement = () => {
   const [apiKeys, setApiKeys] = useState<ApiKeyInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
+  const [regenerating, setRegenerating] = useState<string | null>(null); // serverId being regenerated
+  const [revoking, setRevoking] = useState<string | null>(null); // serverId being revoked
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Modal state
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'danger' | 'warning' | 'info';
+    confirmText: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -159,6 +172,93 @@ const ServerManagement = () => {
 
   const getInstallCommand = (apiKey: string) => {
     return `curl -sSL https://your-server/install-agent.sh | bash -s -- --api-key="${apiKey}" --server-url="http://localhost:8000"`;
+  };
+
+  const handleRegenerateKey = (serverId: string, hostname: string) => {
+    setModalConfig({
+      isOpen: true,
+      title: 'Regenerate API Key',
+      message: `Are you sure you want to regenerate the API key for "${hostname}"? The old key will be deactivated and any agents using it will need to be updated.`,
+      type: 'warning',
+      confirmText: 'Regenerate Key',
+      onConfirm: () => performRegenerateKey(serverId, hostname),
+    });
+  };
+
+  const performRegenerateKey = async (serverId: string, hostname: string) => {
+    setModalConfig(null);
+    setRegenerating(serverId);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await apiClient.regenerateServerKey(
+        serverId,
+        `Regenerated key for ${hostname}`
+      );
+
+      // Update the API key in the list
+      setApiKeys((prev) =>
+        prev.map((key) =>
+          key.serverId === serverId ? { ...key, apiKey: response.apiKey } : key
+        )
+      );
+
+      setSuccess(
+        `API key regenerated successfully for "${hostname}"! New key: ${response.apiKey}`
+      );
+
+      // Reload servers to get updated data
+      await loadServers();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to regenerate API key. Please try again.'
+      );
+      console.error('Error regenerating API key:', err);
+    } finally {
+      setRegenerating(null);
+    }
+  };
+
+  const handleRevokeServer = (serverId: string, hostname: string) => {
+    setModalConfig({
+      isOpen: true,
+      title: 'Revoke Server',
+      message: `Are you sure you want to revoke and remove server "${hostname}"? This will permanently delete the server and deactivate its API key. This action cannot be undone.`,
+      type: 'danger',
+      confirmText: 'Revoke Server',
+      onConfirm: () => performRevokeServer(serverId, hostname),
+    });
+  };
+
+  const performRevokeServer = async (serverId: string, hostname: string) => {
+    setModalConfig(null);
+    setRevoking(serverId);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await apiClient.revokeServer(serverId);
+
+      // Remove the server from the lists
+      setApiKeys((prev) => prev.filter((key) => key.serverId !== serverId));
+      setServers((prev) => prev.filter((server) => server.id !== serverId));
+
+      setSuccess(
+        `Server "${hostname}" has been revoked and removed successfully.`
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to revoke server. Please try again.'
+      );
+      console.error('Error revoking server:', err);
+    } finally {
+      setRevoking(null);
+    }
   };
 
   if (loading) {
@@ -318,11 +418,45 @@ const ServerManagement = () => {
                     >
                       Copy Install Command
                     </button>
-                    <button className="regenerate-btn" disabled>
-                      Regenerate
+                    <button
+                      className="regenerate-btn"
+                      onClick={() =>
+                        handleRegenerateKey(keyInfo.serverId, keyInfo.hostname)
+                      }
+                      disabled={
+                        regenerating === keyInfo.serverId ||
+                        revoking === keyInfo.serverId
+                      }
+                      title="Regenerate API key for this server"
+                    >
+                      {regenerating === keyInfo.serverId ? (
+                        <>
+                          <span className="loading-spinner small"></span>
+                          Regenerating...
+                        </>
+                      ) : (
+                        'Regenerate'
+                      )}
                     </button>
-                    <button className="revoke-btn" disabled>
-                      Revoke
+                    <button
+                      className="revoke-btn"
+                      onClick={() =>
+                        handleRevokeServer(keyInfo.serverId, keyInfo.hostname)
+                      }
+                      disabled={
+                        regenerating === keyInfo.serverId ||
+                        revoking === keyInfo.serverId
+                      }
+                      title="Revoke and remove this server"
+                    >
+                      {revoking === keyInfo.serverId ? (
+                        <>
+                          <span className="loading-spinner small"></span>
+                          Revoking...
+                        </>
+                      ) : (
+                        'Revoke'
+                      )}
                     </button>
                   </div>
                 </div>
@@ -353,6 +487,20 @@ const ServerManagement = () => {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {modalConfig && (
+        <ConfirmationModal
+          isOpen={modalConfig.isOpen}
+          title={modalConfig.title}
+          message={modalConfig.message}
+          type={modalConfig.type}
+          confirmText={modalConfig.confirmText}
+          onConfirm={modalConfig.onConfirm}
+          onCancel={() => setModalConfig(null)}
+          isLoading={regenerating !== null || revoking !== null}
+        />
+      )}
     </div>
   );
 };

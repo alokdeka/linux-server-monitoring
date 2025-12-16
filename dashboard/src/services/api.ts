@@ -45,6 +45,11 @@ export interface ApiClient {
   registerServer(
     serverData: ServerRegistrationData
   ): Promise<{ apiKey: string }>;
+  regenerateServerKey(
+    serverId: string,
+    description?: string
+  ): Promise<{ apiKey: string; keyId: string }>;
+  revokeServer(serverId: string): Promise<void>;
   getServerHealth(): Promise<HealthCheckResponse>;
 
   // Authentication
@@ -338,6 +343,11 @@ class ApiClientImpl implements ApiClient {
       });
 
       const response = await this.request<{
+        server_id: string;
+        start_time: string;
+        end_time: string;
+        interval_minutes: number;
+        data_points: number;
         metrics: Array<{
           id: number;
           server_id: string;
@@ -423,7 +433,7 @@ class ApiClientImpl implements ApiClient {
       api_key: string;
       key_id: string;
       registered_at: string;
-    }>('/api/v1/register', {
+    }>('/api/v1/dashboard/management/servers/register', {
       method: 'POST',
       body: JSON.stringify({
         server_id: `${serverData.hostname}-${Date.now()}`, // Generate unique server ID
@@ -433,6 +443,34 @@ class ApiClientImpl implements ApiClient {
     });
 
     return { apiKey: response.api_key };
+  }
+
+  async regenerateServerKey(
+    serverId: string,
+    description?: string
+  ): Promise<{ apiKey: string; keyId: string }> {
+    const response = await this.request<{
+      message: string;
+      server_id: string;
+      api_key: string;
+      key_id: string;
+      regenerated_at: string;
+      previous_keys_deactivated: number;
+    }>(`/api/v1/dashboard/management/servers/${serverId}/regenerate-key`, {
+      method: 'POST',
+      body: JSON.stringify({
+        description:
+          description || `Regenerated API key for server ${serverId}`,
+      }),
+    });
+
+    return { apiKey: response.api_key, keyId: response.key_id };
+  }
+
+  async revokeServer(serverId: string): Promise<void> {
+    await this.request(`/api/v1/dashboard/management/servers/${serverId}`, {
+      method: 'DELETE',
+    });
   }
 
   async getServerHealth(): Promise<HealthCheckResponse> {

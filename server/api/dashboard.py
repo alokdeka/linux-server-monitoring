@@ -715,7 +715,6 @@ class ServerRegistrationRequest(BaseModel):
 
 class ApiKeyRegenerationRequest(BaseModel):
     """Request model for API key regeneration."""
-    server_id: str = Field(..., min_length=1)
     description: Optional[str] = Field(None, max_length=500)
 
 
@@ -790,7 +789,7 @@ async def register_server_via_dashboard(request: Request,
         from server.auth.service import AuthenticationService
         
         # Check if server already exists
-        existing_server = ServerOperations.get_server_by_id(db_session, registration_data.server_id)
+        existing_server = ServerOperations.get_server(db_session, registration_data.server_id)
         if existing_server:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -859,7 +858,7 @@ async def regenerate_server_api_key(server_id: str,
         from server.auth.service import AuthenticationService
         
         # Verify server exists
-        server = ServerOperations.get_server_by_id(db_session, server_id)
+        server = ServerOperations.get_server(db_session, server_id)
         if not server:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -920,7 +919,7 @@ async def deregister_server(server_id: str,
     """
     try:
         # Verify server exists
-        server = ServerOperations.get_server_by_id(db_session, server_id)
+        server = ServerOperations.get_server(db_session, server_id)
         if not server:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

@@ -13,8 +13,7 @@ from datetime import datetime
 # Configuration
 SERVER_URL = "http://localhost:8000"
 API_KEYS = [
-    "9PIvy1SLjXTm1RX7nXHKWChrdZd_MSxXw2mT9QVhHbo",  # test-server-001
-    "tnzE1lbYR8JIpK5gq_8DqZNKbKJYk9k8hjd9VNJuXFw"   # test-server-002
+    "0heKhZdDyTONhU64GIKq5JRAjyg0kvoKfwA4Juz22fk",  # test-server-003 (active)
 ]
 
 def generate_mock_metrics(server_id):
@@ -82,7 +81,7 @@ def main():
     print("📊 This will send mock metrics data for registered test servers")
     print("⏹️  Press Ctrl+C to stop\n")
     
-    server_ids = ["test-server-001", "test-server-002"]
+    server_ids = ["test-server-003"]  # Only active server
     
     try:
         while True:
