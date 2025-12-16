@@ -187,3 +187,92 @@ class AlertRule(Base):
 
     def __repr__(self):
         return f"<AlertRule(name='{self.name}', type='{self.alert_type}', threshold={self.threshold_value})>"
+
+
+class DashboardUser(Base):
+    """Dashboard user accounts for web interface authentication."""
+    __tablename__ = "dashboard_users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(255), unique=True, nullable=False, index=True)
+    email = Column(String(255), unique=True, nullable=True, index=True)
+    password_hash = Column(String(255), nullable=False)
+    full_name = Column(String(255), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    is_admin = Column(Boolean, default=False, nullable=False)
+    
+    # Session management
+    last_login = Column(DateTime, nullable=True)
+    login_count = Column(Integer, default=0, nullable=False)
+    
+    # Metadata
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    
+    # Relationships
+    sessions = relationship("DashboardSession", back_populates="user", cascade="all, delete-orphan")
+    settings = relationship("DashboardSettings", back_populates="user", uselist=False)
+
+    def __repr__(self):
+        return f"<DashboardUser(username='{self.username}', email='{self.email}')>"
+
+
+class DashboardSession(Base):
+    """Dashboard user sessions for JWT token management."""
+    __tablename__ = "dashboard_sessions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("dashboard_users.id"), nullable=False)
+    session_token = Column(String(255), unique=True, nullable=False, index=True)
+    refresh_token = Column(String(255), unique=True, nullable=False, index=True)
+    expires_at = Column(DateTime, nullable=False)
+    refresh_expires_at = Column(DateTime, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    
+    # Session metadata
+    ip_address = Column(String(45), nullable=True)  # IPv6 compatible
+    user_agent = Column(Text, nullable=True)
+    last_activity = Column(DateTime, default=func.now(), nullable=False)
+    
+    # Metadata
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    
+    # Relationships
+    user = relationship("DashboardUser", back_populates="sessions")
+
+    def __repr__(self):
+        return f"<DashboardSession(user_id={self.user_id}, expires_at='{self.expires_at}')>"
+
+
+class DashboardSettings(Base):
+    """Dashboard user settings and preferences."""
+    __tablename__ = "dashboard_settings"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("dashboard_users.id"), unique=True, nullable=False)
+    
+    # Display preferences
+    theme = Column(String(20), default='light', nullable=False)  # 'light', 'dark'
+    refresh_interval = Column(Integer, default=30, nullable=False)  # seconds
+    compact_mode = Column(Boolean, default=False, nullable=False)
+    charts_enabled = Column(Boolean, default=True, nullable=False)
+    
+    # Alert thresholds
+    cpu_threshold = Column(Float, default=80.0, nullable=False)
+    memory_threshold = Column(Float, default=85.0, nullable=False)
+    disk_threshold = Column(Float, default=90.0, nullable=False)
+    
+    # Notification settings
+    notifications_enabled = Column(Boolean, default=True, nullable=False)
+    webhook_urls = Column(JSON, nullable=False, default=list)
+    email_notifications = Column(Boolean, default=False, nullable=False)
+    
+    # Metadata
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    
+    # Relationships
+    user = relationship("DashboardUser", back_populates="settings")
+
+    def __repr__(self):
+        return f"<DashboardSettings(user_id={self.user_id}, theme='{self.theme}')>"

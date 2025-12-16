@@ -1,0 +1,109 @@
+{
+    "name": "Server Monitoring Dashboard",
+    "short_name": "Dashboard",
+    "description": "Real-time server health monitoring and management dashboard",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f1419",
+    "theme_color": "#4299e1",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "en",
+    "dir": "ltr",
+    "categories": [
+        "productivity",
+        "utilities"
+    ],
+    "icons": [
+        {
+            "src": "/vite.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/vite.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "/vite.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshot-wide.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Dashboard overview showing server grid and metrics"
+        },
+        {
+            "src": "/screenshot-narrow.png",
+            "sizes": "390x844",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Mobile view of server monitoring dashboard"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "View Servers",
+            "short_name": "Servers",
+            "description": "View all monitored servers",
+            "url": "/servers",
+            "icons": [
+                {
+                    "src": "/vite.svg",
+                    "sizes": "96x96",
+                    "type": "image/svg+xml"
+                }
+            ]
+        },
+        {
+            "name": "View Alerts",
+            "short_name": "Alerts",
+            "description": "View active alerts and notifications",
+            "url": "/alerts",
+            "icons": [
+                {
+                    "src": "/vite.svg",
+                    "sizes": "96x96",
+                    "type": "image/svg+xml"
+                }
+            ]
+        },
+        {
+            "name": "Settings",
+            "short_name": "Settings",
+            "description": "Configure dashboard settings",
+            "url": "/settings",
+            "icons": [
+                {
+                    "src": "/vite.svg",
+                    "sizes": "96x96",
+                    "type": "image/svg+xml"
+                }
+            ]
+        }
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "handle_links": "preferred",
+    "protocol_handlers": [
+        {
+            "protocol": "web+monitoring",
+            "url": "/servers/%s"
+        }
+    ]
+}

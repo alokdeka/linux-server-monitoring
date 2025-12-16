@@ -1,0 +1,42 @@
+.skeleton-loader {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base, #f0f0f0) 25%,
+    var(--skeleton-highlight, #e0e0e0) 50%,
+    var(--skeleton-base, #f0f0f0) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  display: block;
+}
+
+.skeleton-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .skeleton-loader {
+    --skeleton-base: #374151;
+    --skeleton-highlight: #4b5563;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-loader {
+    animation: none;
+    background: var(--skeleton-base, #f0f0f0);
+  }
+}

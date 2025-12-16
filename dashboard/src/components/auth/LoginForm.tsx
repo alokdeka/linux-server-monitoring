@@ -8,6 +8,8 @@ import {
   fetchCurrentUser,
 } from '../../store/slices/authSlice';
 import type { LoginCredentials } from '../../types';
+import { useFormValidation } from '../../hooks/useFormValidation';
+import { FormField, useToast, SimpleThemeToggle } from '../common';
 import './LoginForm.css';
 
 interface LocationState {
@@ -19,19 +21,36 @@ interface LocationState {
 const LoginForm = () => {
   const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
+  const { showToast } = useToast();
   const { loading, error, isAuthenticated } = useSelector(
     (state: RootState) => state.auth
   );
 
-  const [credentials, setCredentials] = useState<LoginCredentials>({
-    username: '',
-    password: '',
-  });
-
-  const [validationErrors, setValidationErrors] = useState<{
-    username?: string;
-    password?: string;
-  }>({});
+  const [formState, formActions] = useFormValidation<LoginCredentials>(
+    { username: '', password: '' },
+    {
+      fields: {
+        username: {
+          rules: {
+            required: true,
+            minLength: 2,
+          },
+          validateOnChange: true,
+          validateOnBlur: true,
+          debounceMs: 300,
+        },
+        password: {
+          rules: {
+            required: true,
+            minLength: 3,
+          },
+          validateOnChange: true,
+          validateOnBlur: true,
+          debounceMs: 300,
+        },
+      },
+    }
+  );
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -40,50 +59,46 @@ const LoginForm = () => {
     return <Navigate to={from} replace />;
   }
 
-  const validateForm = (): boolean => {
-    const errors: { username?: string; password?: string } = {};
-
-    if (!credentials.username.trim()) {
-      errors.username = 'Username is required';
-    }
-
-    if (!credentials.password) {
-      errors.password = 'Password is required';
-    } else if (credentials.password.length < 3) {
-      errors.password = 'Password must be at least 3 characters';
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    if (!formActions.validateForm()) {
+      showToast(
+        'error',
+        'Validation Error',
+        'Please fix the form errors before submitting.'
+      );
       return;
     }
 
     // Clear any previous errors
     dispatch(clearError());
+    formActions.setSubmitting(true);
 
     try {
-      await dispatch(loginUser(credentials)).unwrap();
+      await dispatch(loginUser(formState.values)).unwrap();
       // Fetch user info after successful login
       await dispatch(fetchCurrentUser()).unwrap();
+      showToast(
+        'success',
+        'Welcome!',
+        'Successfully logged in to the dashboard.'
+      );
     } catch (error) {
       // Error is handled by the Redux slice
       console.error('Login failed:', error);
+      showToast(
+        'error',
+        'Login Failed',
+        error instanceof Error ? error.message : 'Authentication failed'
+      );
+    } finally {
+      formActions.setSubmitting(false);
     }
   };
 
   const handleInputChange = (field: keyof LoginCredentials, value: string) => {
-    setCredentials((prev) => ({ ...prev, [field]: value }));
-
-    // Clear validation error for this field
-    if (validationErrors[field]) {
-      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
+    formActions.setValue(field, value);
 
     // Clear auth error when user starts typing
     if (error) {
@@ -93,46 +108,50 @@ const LoginForm = () => {
 
   return (
     <div className="login-form-container">
+      {/* Theme toggle in top-right corner */}
+      <div className="login-theme-toggle">
+        <SimpleThemeToggle />
+      </div>
+
       <div className="login-form-card">
         <div className="login-form-header">
           <h1>Server Monitor Dashboard</h1>
-          <p>Sign in to access your monitoring dashboard</p>
+          <p>
+            Sign in to access your monitoring dashboard and manage your
+            infrastructure
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input
-              id="username"
-              type="text"
-              value={credentials.username}
-              onChange={(e) => handleInputChange('username', e.target.value)}
-              className={validationErrors.username ? 'error' : ''}
-              disabled={loading}
-              autoComplete="username"
-              placeholder="Enter your username"
-            />
-            {validationErrors.username && (
-              <span className="error-message">{validationErrors.username}</span>
-            )}
-          </div>
+          <FormField
+            label="Username"
+            type="text"
+            value={formState.values.username}
+            onChange={(e) => handleInputChange('username', e.target.value)}
+            onBlur={() => formActions.setTouched('username', true)}
+            error={formState.errors.username}
+            touched={formState.touched.username}
+            required
+            disabled={loading || formState.isSubmitting}
+            autoComplete="username"
+            placeholder="Enter your username"
+            loading={loading}
+          />
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={credentials.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              className={validationErrors.password ? 'error' : ''}
-              disabled={loading}
-              autoComplete="current-password"
-              placeholder="Enter your password"
-            />
-            {validationErrors.password && (
-              <span className="error-message">{validationErrors.password}</span>
-            )}
-          </div>
+          <FormField
+            label="Password"
+            type="password"
+            value={formState.values.password}
+            onChange={(e) => handleInputChange('password', e.target.value)}
+            onBlur={() => formActions.setTouched('password', true)}
+            error={formState.errors.password}
+            touched={formState.touched.password}
+            required
+            disabled={loading || formState.isSubmitting}
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            loading={loading}
+          />
 
           {error && (
             <div className="auth-error">
@@ -140,13 +159,17 @@ const LoginForm = () => {
             </div>
           )}
 
-          <button type="submit" className="login-button" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+          <button
+            type="submit"
+            className="login-button"
+            disabled={loading || formState.isSubmitting || !formState.isValid}
+          >
+            {loading || formState.isSubmitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
         <div className="login-form-footer">
-          <p>Access your server monitoring dashboard with your credentials</p>
+          <p>🔒 Secure access to your server monitoring dashboard</p>
         </div>
       </div>
     </div>

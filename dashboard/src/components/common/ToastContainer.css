@@ -1,0 +1,51 @@
+.toast-container {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+.toast-container > * {
+  pointer-events: auto;
+}
+
+/* Position variants */
+.toast-container.top-right {
+  top: 1rem;
+  right: 1rem;
+}
+
+.toast-container.top-left {
+  top: 1rem;
+  left: 1rem;
+}
+
+.toast-container.bottom-right {
+  bottom: 1rem;
+  right: 1rem;
+}
+
+.toast-container.bottom-left {
+  bottom: 1rem;
+  left: 1rem;
+}
+
+/* Responsive positioning */
+@media (max-width: 640px) {
+  .toast-container {
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+
+  .toast-container.top-right,
+  .toast-container.top-left {
+    top: 1rem;
+  }
+
+  .toast-container.bottom-right,
+  .toast-container.bottom-left {
+    bottom: 1rem;
+  }
+}

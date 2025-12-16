@@ -1,11 +1,12 @@
-/* Modern Dark Dashboard */
+/* Modern Dashboard */
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #0f1419;
+  background: var(--bg-primary);
   position: relative;
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
 .app-layout {
@@ -49,8 +50,8 @@ body {
     sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0f1419 !important;
-  color: #ffffff !important;
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
   font-weight: 400;
   line-height: 1.6;
   width: 100% !important;
@@ -60,6 +61,9 @@ body {
   place-items: unset !important;
   min-width: unset !important;
   min-height: unset !important;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease !important;
 }
 
 /* Remove floating orbs */
@@ -67,16 +71,7 @@ body {
   display: none;
 }
 
-/* Login page styles */
-.login-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 2rem;
-  background: #0f1419;
-  width: 100%;
-}
+/* Login page styles - handled by LoginForm component */
 
 /* Page content styles */
 .dashboard-page,
@@ -95,10 +90,11 @@ body {
 .server-management-page h1,
 .settings-page h1 {
   margin: 0;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 2rem;
   font-weight: 600;
   letter-spacing: -0.01em;
+  transition: color 0.3s ease;
 }
 
 .dashboard-page p,
@@ -106,11 +102,12 @@ body {
 .alerts-page p,
 .server-management-page p,
 .settings-page p {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 1rem;
   line-height: 1.5;
   font-weight: 400;
   margin: 0;
+  transition: color 0.3s ease;
 }
 
 @keyframes fadeIn {
@@ -130,16 +127,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: var(--border-primary);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: var(--text-muted);
 }
 /* Authentication loading state */
 .auth-loading {
@@ -147,7 +144,10 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #0f1419;
+  background-color: var(--bg-primary);
   font-size: 1.1rem;
-  color: #94a3b8;
+  color: var(--text-muted);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }

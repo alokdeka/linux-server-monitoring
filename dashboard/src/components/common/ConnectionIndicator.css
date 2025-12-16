@@ -1,0 +1,50 @@
+.connection-indicator {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.connection-status-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  backdrop-filter: blur(10px);
+}
+
+.status-icon {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.connection-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.status-text {
+  font-weight: 500;
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.update-frequency {
+  font-size: 0.625rem;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .connection-details {
+    display: none;
+  }
+
+  .connection-status-compact {
+    padding: 0.25rem;
+  }
+}

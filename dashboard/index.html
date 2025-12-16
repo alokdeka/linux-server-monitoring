@@ -1,13 +1,61 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>dashboard</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Server Monitoring Dashboard</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- PWA Meta Tags -->
+  <meta name="application-name" content="Server Monitoring Dashboard" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Dashboard" />
+  <meta name="description" content="Real-time server health monitoring and management dashboard" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="msapplication-config" content="/browserconfig.xml" />
+  <meta name="msapplication-TileColor" content="#4299e1" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="theme-color" content="#4299e1" />
+
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" href="/vite.svg" />
+  <link rel="apple-touch-icon" sizes="152x152" href="/vite.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/vite.svg" />
+  <link rel="apple-touch-icon" sizes="167x167" href="/vite.svg" />
+
+  <!-- Splash Screen Images for iOS -->
+  <link rel="apple-touch-startup-image" href="/vite.svg"
+    media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/vite.svg"
+    media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/vite.svg"
+    media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/vite.svg"
+    media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+
+  <!-- Performance and Security -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+  <!-- Preload critical resources -->
+  <link rel="preconnect" href="/" />
+  <link rel="dns-prefetch" href="/" />
+
+  <!-- Accessibility -->
+  <meta name="color-scheme" content="dark light" />
+</head>
+
+<body>
+  <!-- Runtime environment configuration (injected by Docker) -->
+  <script src="/env-config.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

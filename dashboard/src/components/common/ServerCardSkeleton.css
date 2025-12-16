@@ -1,0 +1,65 @@
+.server-card-skeleton {
+  background: var(--card-background, #ffffff);
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 200px;
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.skeleton-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color, #e1e5e9);
+}
+
+.server-cards-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .server-card-skeleton {
+    --card-background: #1f2937;
+    --border-color: #374151;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .server-cards-skeleton-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+
+  .server-card-skeleton {
+    padding: 1rem;
+  }
+}

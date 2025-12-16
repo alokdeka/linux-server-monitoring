@@ -1,0 +1,125 @@
+.retry-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.retry-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 6px;
+  background-color: var(--button-background, #ffffff);
+  color: var(--button-text, #374151);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: fit-content;
+}
+
+.retry-button:hover:not(:disabled) {
+  background-color: var(--button-hover, #f9fafb);
+  border-color: var(--border-hover, #9ca3af);
+}
+
+.retry-button:focus {
+  outline: 2px solid var(--focus-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+.retry-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.retry-button.retrying {
+  background-color: var(--button-loading, #f3f4f6);
+  border-color: var(--border-loading, #d1d5db);
+}
+
+.retry-button.max-retries {
+  background-color: var(--button-error, #fef2f2);
+  border-color: var(--border-error, #fecaca);
+  color: var(--text-error, #dc2626);
+}
+
+.retry-count {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.retry-error {
+  padding: 0.5rem;
+  background-color: var(--error-background, #fef2f2);
+  border: 1px solid var(--error-border, #fecaca);
+  border-radius: 4px;
+  color: var(--error-text, #dc2626);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.retry-help {
+  padding: 0.75rem;
+  background-color: var(--help-background, #fffbeb);
+  border: 1px solid var(--help-border, #fed7aa);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+}
+
+.retry-help p {
+  margin: 0 0 0.5rem 0;
+  color: var(--help-text, #92400e);
+}
+
+.reset-retry-button {
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--reset-button, #f59e0b);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.reset-retry-button:hover {
+  background-color: var(--reset-button-hover, #d97706);
+}
+
+.reset-retry-button:focus {
+  outline: 2px solid var(--focus-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .retry-button {
+    --button-background: #374151;
+    --button-text: #f9fafb;
+    --button-hover: #4b5563;
+    --border-color: #6b7280;
+    --border-hover: #9ca3af;
+    --button-loading: #4b5563;
+    --border-loading: #6b7280;
+    --button-error: #7f1d1d;
+    --border-error: #dc2626;
+    --text-error: #fca5a5;
+  }
+
+  .retry-error {
+    --error-background: #7f1d1d;
+    --error-border: #dc2626;
+    --error-text: #fca5a5;
+  }
+
+  .retry-help {
+    --help-background: #78350f;
+    --help-border: #d97706;
+    --help-text: #fcd34d;
+  }
+}

@@ -1,14 +1,36 @@
+/* Import responsive design system */
+@import './styles/responsive.css';
+/* Import accessibility enhancements */
+@import './styles/accessibility.css';
+
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0f1419;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Default theme variables - will be overridden by theme system */
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a202c;
+  --bg-tertiary: #2d3748;
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border-primary: #2d3748;
+  --border-secondary: #4a5568;
+  --color-primary: #4299e1;
+  --color-success: #48bb78;
+  --color-warning: #ed8936;
+  --color-error: #f56565;
+
+  /* RGB values for rgba() usage */
+  --color-primary-rgb: 66, 153, 225;
+  --color-success-rgb: 72, 187, 120;
+  --color-warning-rgb: 237, 137, 54;
+  --color-error-rgb: 245, 101, 101;
 }
 
 * {
@@ -22,8 +44,8 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background: #0f1419;
-  color: #ffffff;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   width: 100%;
   overflow-x: hidden;
@@ -32,6 +54,9 @@ body {
   place-items: unset;
   min-width: unset;
   min-height: unset;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 #root {
@@ -41,12 +66,13 @@ body {
 
 a {
   font-weight: 500;
-  color: #4299e1;
+  color: var(--color-primary);
   text-decoration: inherit;
+  transition: color 0.2s ease;
 }
 
 a:hover {
-  color: #3182ce;
+  opacity: 0.8;
 }
 
 button {
@@ -56,18 +82,19 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #4299e1;
+  background-color: var(--color-primary);
   color: white;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 button:hover {
-  background-color: #3182ce;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 button:focus,
 button:focus-visible {
-  outline: 2px solid #4299e1;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }

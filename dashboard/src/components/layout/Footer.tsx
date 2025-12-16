@@ -1,13 +1,19 @@
 import './Footer.css';
 
 interface FooterProps {
-  connectionStatus?: 'connected' | 'disconnected' | 'connecting';
+  connectionStatus?:
+    | 'connected'
+    | 'disconnected'
+    | 'connecting'
+    | 'reconnecting';
   lastUpdate?: Date;
+  onReconnect?: () => void;
 }
 
 const Footer = ({
   connectionStatus = 'connected',
   lastUpdate,
+  onReconnect,
 }: FooterProps) => {
   const getStatusColor = () => {
     switch (connectionStatus) {
@@ -16,6 +22,7 @@ const Footer = ({
       case 'disconnected':
         return '#ef4444'; // red
       case 'connecting':
+      case 'reconnecting':
         return '#f59e0b'; // yellow
       default:
         return '#6b7280'; // gray
@@ -30,6 +37,8 @@ const Footer = ({
         return 'Disconnected';
       case 'connecting':
         return 'Connecting...';
+      case 'reconnecting':
+        return 'Reconnecting...';
       default:
         return 'Unknown';
     }
@@ -50,6 +59,16 @@ const Footer = ({
               aria-label={`Connection status: ${getStatusText()}`}
             />
             <span className="status-text">{getStatusText()}</span>
+            {connectionStatus === 'disconnected' && onReconnect && (
+              <button
+                className="reconnect-button"
+                onClick={onReconnect}
+                aria-label="Reconnect to server"
+                title="Click to reconnect"
+              >
+                Reconnect
+              </button>
+            )}
           </div>
         </div>
 

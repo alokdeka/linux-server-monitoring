@@ -1,0 +1,166 @@
+.alert-toast-container {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.alert-toast-container > * {
+  pointer-events: auto;
+}
+
+/* Position variants */
+.alert-toast-container.top-right {
+  top: 20px;
+  right: 20px;
+}
+
+.alert-toast-container.top-left {
+  top: 20px;
+  left: 20px;
+}
+
+.alert-toast-container.bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+
+.alert-toast-container.bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+/* Tablet responsive (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .alert-toast-container.top-right,
+  .alert-toast-container.bottom-right {
+    right: 15px;
+  }
+
+  .alert-toast-container.top-left,
+  .alert-toast-container.bottom-left {
+    left: 15px;
+  }
+
+  .alert-toast-container.top-right,
+  .alert-toast-container.top-left {
+    top: 15px;
+  }
+
+  .alert-toast-container.bottom-right,
+  .alert-toast-container.bottom-left {
+    bottom: 15px;
+  }
+}
+
+/* Mobile responsive (max-width: 767px) */
+@media (max-width: 767px) {
+  .alert-toast-container {
+    left: 1rem !important;
+    right: 1rem !important;
+    top: 1rem;
+    width: calc(100% - 2rem);
+  }
+
+  .alert-toast-container.bottom-right,
+  .alert-toast-container.bottom-left {
+    bottom: 1rem;
+    top: auto;
+  }
+
+  /* Adjust for mobile header */
+  .alert-toast-container.top-right,
+  .alert-toast-container.top-left {
+    top: 5rem; /* Account for mobile header height */
+  }
+}
+
+/* Small mobile responsive (max-width: 480px) */
+@media (max-width: 480px) {
+  .alert-toast-container {
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    width: calc(100% - 1rem);
+  }
+
+  .alert-toast-container.top-right,
+  .alert-toast-container.top-left {
+    top: 4.5rem;
+  }
+
+  .alert-toast-container.bottom-right,
+  .alert-toast-container.bottom-left {
+    bottom: 0.5rem;
+  }
+}
+
+/* Large desktop responsive (1440px+) */
+@media (min-width: 1440px) {
+  .alert-toast-container.top-right,
+  .alert-toast-container.bottom-right {
+    right: 2rem;
+  }
+
+  .alert-toast-container.top-left,
+  .alert-toast-container.bottom-left {
+    left: 2rem;
+  }
+
+  .alert-toast-container.top-right,
+  .alert-toast-container.top-left {
+    top: 2rem;
+  }
+
+  .alert-toast-container.bottom-right,
+  .alert-toast-container.bottom-left {
+    bottom: 2rem;
+  }
+}
+
+/* Portrait orientation adjustments */
+@media (orientation: portrait) and (max-width: 1023px) {
+  .alert-toast-container {
+    max-width: 100%;
+  }
+
+  .alert-toast-container.top-right,
+  .alert-toast-container.top-left {
+    top: 5rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+  .alert-toast-container.top-right,
+  .alert-toast-container.top-left {
+    top: 0.5rem;
+  }
+
+  .alert-toast-container.bottom-right,
+  .alert-toast-container.bottom-left {
+    bottom: 0.5rem;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .alert-toast-container > * {
+    border: 2px solid #ffffff;
+  }
+}
+
+/* Print styles */
+@media print {
+  .alert-toast-container {
+    display: none !important;
+  }
+}
+
+/* Accessibility improvements */
+.alert-toast-container[aria-live] {
+  /* Ensure screen readers announce toast messages */
+}
+
+/* Focus management for toast interactions */
+.alert-toast-container:focus-within {
+  z-index: 10000;
+}
