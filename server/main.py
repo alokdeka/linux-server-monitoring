@@ -37,8 +37,12 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Linux Server Health Monitoring System")
     
-    # Initialize database connection
+    # Initialize database connection and create tables
     try:
+        # Create database tables
+        db_manager.create_tables()
+        logger.info("Database tables created/verified successfully")
+        
         # Test database connection
         if db_manager.health_check():
             logger.info("Database connection established successfully")
@@ -70,7 +74,7 @@ async def websocket_route(websocket: WebSocket, token: str = None,
 # Update CORS settings to allow dashboard access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # Add common dev ports
+    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"],  # Add common dev ports
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Requested-With"],

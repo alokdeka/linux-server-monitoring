@@ -2,6 +2,7 @@
 // Based on the design document specifications
 
 import type { ServerMetrics, Alert } from '../types';
+import { environment } from '../config/environment';
 
 export interface ServerStatus {
   serverId: string;
@@ -20,7 +21,11 @@ export interface WebSocketClient {
 type WebSocketEventType =
   | 'metrics_update'
   | 'alert_update'
-  | 'server_status_change';
+  | 'server_status_change'
+  | 'connection_established'
+  | 'pong'
+  | 'subscription_confirmed'
+  | 'error';
 
 interface WebSocketMessage {
   type: WebSocketEventType;
@@ -50,9 +55,8 @@ class WebSocketClientImpl implements WebSocketClient {
   }
 
   private getWebSocketUrl(): string {
-    const apiUrl = import.meta.env?.VITE_API_URL || 'http://localhost:8000';
-    // Convert HTTP URL to WebSocket URL
-    return apiUrl.replace(/^http/, 'ws') + '/ws';
+    // Use environment configuration for WebSocket URL
+    return `${environment.wsBaseUrl}/ws`;
   }
 
   connect(): void {
@@ -181,6 +185,22 @@ class WebSocketClientImpl implements WebSocketClient {
             console.error('Error in status callback:', error);
           }
         });
+        break;
+
+      case 'connection_established':
+        console.log('WebSocket connection established:', message.data);
+        break;
+
+      case 'pong':
+        console.log('WebSocket pong received');
+        break;
+
+      case 'subscription_confirmed':
+        console.log('WebSocket subscription confirmed:', message.data);
+        break;
+
+      case 'error':
+        console.error('WebSocket error message:', message.data);
         break;
 
       default:

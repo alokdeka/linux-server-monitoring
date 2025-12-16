@@ -110,16 +110,19 @@ describe('ApiClient', () => {
         password: 'password123',
       });
 
-      expect(fetch).toHaveBeenCalledWith('http://localhost:8000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: 'testuser',
-          password: 'password123',
-        }),
-      });
+      expect(fetch).toHaveBeenCalledWith(
+        'http://localhost:8000/api/v1/dashboard/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: 'testuser',
+            password: 'password123',
+          }),
+        }
+      );
       expect(result.token).toBe('new-token');
     });
   });

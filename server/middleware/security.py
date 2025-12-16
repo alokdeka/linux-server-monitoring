@@ -90,10 +90,12 @@ class SecurityMiddleware:
                 }
             )
         
-        # Skip security validation for documentation endpoints
-        if self._is_docs_endpoint(request):
+        # Skip security validation for documentation endpoints and WebSocket upgrades
+        if self._is_docs_endpoint(request) or self._is_websocket_upgrade(request):
             response = await call_next(request)
-            self._add_security_headers(response)
+            # Don't add security headers to WebSocket responses
+            if not self._is_websocket_upgrade(request):
+                self._add_security_headers(response)
             return response
         
         # Validate request for malicious content
@@ -149,16 +151,39 @@ class SecurityMiddleware:
     
     def _is_docs_endpoint(self, request: Request) -> bool:
         """
-        Check if the request is for documentation endpoints.
+        Check if the request is for documentation endpoints, dashboard API, or WebSocket.
         
         Args:
             request: The FastAPI request to check
             
         Returns:
-            True if it's a docs endpoint, False otherwise
+            True if it's a docs endpoint, dashboard API, or WebSocket, False otherwise
         """
         docs_paths = ['/docs', '/redoc', '/openapi.json', '/favicon.ico']
+        
+        # Allow all dashboard API endpoints
+        if request.url.path.startswith('/api/v1/dashboard/'):
+            return True
+            
+        # Allow WebSocket endpoint
+        if request.url.path == '/ws':
+            return True
+            
         return any(request.url.path.startswith(path) for path in docs_paths)
+    
+    def _is_websocket_upgrade(self, request: Request) -> bool:
+        """
+        Check if the request is a WebSocket upgrade request.
+        
+        Args:
+            request: The FastAPI request to check
+            
+        Returns:
+            True if it's a WebSocket upgrade request, False otherwise
+        """
+        connection = request.headers.get("connection", "").lower()
+        upgrade = request.headers.get("upgrade", "").lower()
+        return "upgrade" in connection and upgrade == "websocket"
     
     async def _validate_request_security(self, request: Request):
         """

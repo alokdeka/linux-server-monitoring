@@ -231,13 +231,21 @@ class ApiClientImpl implements ApiClient {
 
   private async refreshTokenInternal(): Promise<AuthToken | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/auth/refresh`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        return null;
+      }
+
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/dashboard/auth/refresh`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        }
+      );
 
       if (!response.ok) {
         return null;
@@ -246,7 +254,7 @@ class ApiClientImpl implements ApiClient {
       const data = await response.json();
       const authToken = {
         token: data.access_token,
-        expiresAt: data.expires_at,
+        expiresAt: new Date(Date.now() + data.expires_in * 1000).toISOString(),
       };
 
       // Update localStorage
@@ -271,7 +279,7 @@ class ApiClientImpl implements ApiClient {
         last_seen: string;
         is_active: boolean;
       }>;
-    }>('/api/v1/servers');
+    }>('/api/v1/dashboard/servers');
 
     // Transform database response to frontend Server interface
     return response.servers.map((server) => ({
@@ -314,7 +322,7 @@ class ApiClientImpl implements ApiClient {
           since?: string;
         }>;
       }>;
-    }>(`/api/v1/servers/${serverId}/metrics?timeRange=${timeRange}`);
+    }>(`/api/v1/dashboard/servers/${serverId}/metrics?timeRange=${timeRange}`);
 
     // Transform database response to frontend ServerMetrics interface
     return response.metrics.map((metric) => ({
@@ -391,20 +399,24 @@ class ApiClientImpl implements ApiClient {
   async login(credentials: LoginCredentials): Promise<AuthToken> {
     const response = await this.request<{
       access_token: string;
-      expires_at: string;
-    }>('/auth/login', {
+      refresh_token: string;
+      expires_in: number;
+      user: User;
+    }>('/api/v1/dashboard/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
 
     return {
       token: response.access_token,
-      expiresAt: response.expires_at,
+      expiresAt: new Date(
+        Date.now() + response.expires_in * 1000
+      ).toISOString(),
     };
   }
 
   async logout(): Promise<void> {
-    await this.request('/auth/logout', {
+    await this.request('/api/v1/dashboard/auth/logout', {
       method: 'POST',
     });
   }
@@ -412,19 +424,22 @@ class ApiClientImpl implements ApiClient {
   async refreshToken(): Promise<AuthToken> {
     const response = await this.request<{
       access_token: string;
-      expires_at: string;
-    }>('/auth/refresh', {
+      refresh_token: string;
+      expires_in: number;
+    }>('/api/v1/dashboard/auth/refresh', {
       method: 'POST',
     });
 
     return {
       token: response.access_token,
-      expiresAt: response.expires_at,
+      expiresAt: new Date(
+        Date.now() + response.expires_in * 1000
+      ).toISOString(),
     };
   }
 
   async getCurrentUser(): Promise<User> {
-    return this.request<User>('/auth/me');
+    return this.request<User>('/api/v1/dashboard/user/profile');
   }
 
   async getAlerts(): Promise<Alert[]> {
@@ -441,7 +456,7 @@ class ApiClientImpl implements ApiClient {
         resolved_at: string | null;
         is_resolved: boolean;
       }>;
-    }>('/api/v1/alerts');
+    }>('/api/v1/dashboard/alerts');
 
     return response.alerts.map((alert) => ({
       id: alert.id.toString(),
@@ -475,7 +490,7 @@ class ApiClientImpl implements ApiClient {
         resolved_at: string | null;
         is_resolved: boolean;
       }>;
-    }>(`/api/v1/alerts/history?${queryParams.toString()}`);
+    }>(`/api/v1/dashboard/alerts/history?${queryParams.toString()}`);
 
     return response.alerts.map((alert) => ({
       id: alert.id.toString(),
@@ -509,7 +524,7 @@ class ApiClientImpl implements ApiClient {
             charts_enabled: boolean;
           };
         };
-      }>('/api/v1/settings');
+      }>('/api/v1/dashboard/settings');
 
       return {
         refreshInterval: response.settings.refresh_interval,
@@ -536,7 +551,7 @@ class ApiClientImpl implements ApiClient {
   }
 
   async updateSettings(settings: DashboardSettings): Promise<void> {
-    await this.request('/api/v1/settings', {
+    await this.request('/api/v1/dashboard/settings', {
       method: 'PUT',
       body: JSON.stringify({
         refresh_interval: settings.refreshInterval,

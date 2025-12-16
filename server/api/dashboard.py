@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request, status, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 
 from server.database.connection import get_db_session
 from server.auth.dashboard_auth import DashboardAuthService
