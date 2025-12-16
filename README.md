@@ -107,9 +107,10 @@ Property-based tests are tagged with comments referencing specific correctness p
 
 ### Core Documentation
 
+- **[Complete Docker Deployment Guide](DOCKER_DEPLOYMENT.md)** - 🐳 **Comprehensive Docker setup and production guide**
 - **[Dashboard User Guide](dashboard/USER_GUIDE.md)** - Complete user guide with feature explanations
 - **[Dashboard API Documentation](DASHBOARD_API.md)** - Comprehensive API reference
-- **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+- **[Deployment Guide](DEPLOYMENT.md)** - Manual installation and production deployment instructions
 
 ### Developer Documentation
 
@@ -120,9 +121,9 @@ Property-based tests are tagged with comments referencing specific correctness p
 
 ### Quick Links
 
+- **[🐳 Docker Deployment Guide](DOCKER_DEPLOYMENT.md)** - Complete Docker setup and production guide
 - **[Getting Started](dashboard/README.md#quick-start)** - Set up the dashboard in minutes
 - **[API Endpoints](DASHBOARD_API.md#authentication)** - Available API endpoints
-- **[Docker Deployment](dashboard/DEPLOYMENT.md#docker-deployment)** - Container deployment guide
 - **[Troubleshooting](dashboard/USER_GUIDE.md#troubleshooting)** - Common issues and solutions
 
 ## 🚀 Quick Start (5 Minutes Setup!)
@@ -144,33 +145,52 @@ cp .env.example .env
 nano .env
 ```
 
+**Important**: Change the `POSTGRES_PASSWORD` to a secure password!
+
 **Step 3: Start everything**
 
 ```bash
-docker-compose up -d
+# Start all services (server, dashboard, database)
+docker compose up -d
+
+# Check if all services are running
+docker compose ps
 ```
 
 **Step 4: Create admin user**
 
 ```bash
 # Create your admin user for the dashboard
-python server/cli/create_admin.py
+docker compose exec server python server/cli/create_admin.py
 ```
 
 Follow the prompts to set up your admin username, email, and password.
 
-**Step 5: Open your dashboard**
+**Step 5: Verify everything is working**
+
+```bash
+# Test API health
+curl http://localhost:8000/api/v1/health
+# Should return: {"status":"healthy"}
+
+# Check service status
+docker compose ps
+# All services should show "Up" and "healthy"
+```
+
+**Step 6: Open your dashboard**
 
 - Go to: `http://localhost:3000` in your web browser
 - Login with the credentials you just created
 
-**Step 6: Add your first server**
+**Step 7: Add your first server**
 
 - Click "Server Management" in the dashboard
 - Click "Register New Server"
+- Fill in server details and click "Generate API Key"
 - Copy the installation command (it looks like this):
   ```bash
-  curl -sSL https://your-server/install-agent.sh | bash -s -- \
+  curl -sSL http://your-server:8000/install-agent.sh | bash -s -- \
     --api-key="your-unique-api-key" \
     --server-url="http://localhost:8000"
   ```
@@ -178,6 +198,8 @@ Follow the prompts to set up your admin username, email, and password.
 - The server will appear in your dashboard within 1-2 minutes!
 
 **That's it! 🎉** Your monitoring system is running!
+
+> 📖 **Need more details?** Check our [Complete Docker Deployment Guide](DOCKER_DEPLOYMENT.md) for advanced configuration, troubleshooting, and production setup.
 
 ### Option 2: Manual Setup (If you prefer more control)
 
@@ -310,7 +332,7 @@ Your Servers → Agents → Central Server → Dashboard → You
 
 ## 🚀 Getting Started
 
-### Quick Deployment with Docker
+### Quick Deployment with Docker (Recommended)
 
 1. **Clone the repository**:
 
@@ -323,25 +345,35 @@ Your Servers → Agents → Central Server → Dashboard → You
 
    ```bash
    cp .env.example .env
-   # Edit .env with your settings
+   # Edit .env with your settings (especially POSTGRES_PASSWORD)
+   nano .env
    ```
 
 3. **Start all services**:
 
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
-4. **Access the dashboard**:
+4. **Create admin user**:
+
+   ```bash
+   docker compose exec server python server/cli/create_admin.py
+   ```
+
+5. **Access the dashboard**:
 
    - Open http://localhost:3000 in your browser
-   - Login with default credentials (see setup documentation)
+   - Login with the credentials you created
 
-5. **Install agents on servers**:
+6. **Install agents on servers**:
    ```bash
-   # On each server to monitor
-   curl -sSL https://your-server/install-agent.sh | bash
+   # Get installation command from dashboard "Server Management" page
+   curl -sSL http://your-server:8000/install-agent.sh | bash -s -- \
+     --api-key="your-api-key" --server-url="http://localhost:8000"
    ```
+
+> 📖 **For detailed Docker setup, troubleshooting, and production configuration, see our [Complete Docker Deployment Guide](DOCKER_DEPLOYMENT.md)**
 
 ### Manual Installation
 
@@ -350,6 +382,17 @@ For detailed manual installation instructions, see:
 - **[Server Setup](DEPLOYMENT.md#manual-installation)**
 - **[Agent Installation](DEPLOYMENT.md#agent-deployment)**
 - **[Dashboard Setup](dashboard/DEPLOYMENT.md)**
+
+### Docker Deployment Features
+
+Our Docker deployment includes:
+
+- ✅ **Complete stack**: PostgreSQL database, FastAPI server, React dashboard
+- ✅ **WebSocket support**: Real-time updates with proper WebSocket libraries
+- ✅ **Optimized rate limiting**: 300 requests/minute for dashboard usage
+- ✅ **Health checks**: Automatic service health monitoring
+- ✅ **Data persistence**: PostgreSQL data stored in Docker volumes
+- ✅ **Production ready**: Resource limits, logging, and security configurations
 
 ### Admin User Management
 
