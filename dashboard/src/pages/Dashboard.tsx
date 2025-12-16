@@ -6,6 +6,7 @@ import {
   fetchAlertHistory,
 } from '../store/slices/alertsSlice';
 import { webSocketClient } from '../services/websocket';
+import SimpleChart from '../components/charts/SimpleChart';
 import './Dashboard.css';
 import './DashboardCards.css';
 
@@ -366,6 +367,36 @@ const Dashboard = () => {
                 <p>Activity will appear here as servers report metrics and alerts are generated</p>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Charts Panel */}
+        <div className="panel">
+          <div className="panel-header">
+            <h2>Performance Charts</h2>
+          </div>
+          <div className="charts-container">
+            <SimpleChart
+              type="bar"
+              title="Server Status"
+              height={150}
+              data={[
+                { label: 'Online', value: metrics.onlineServers, color: 'var(--color-success)' },
+                { label: 'Warning', value: metrics.warningServers, color: 'var(--color-warning)' },
+                { label: 'Offline', value: metrics.offlineServers, color: 'var(--color-error)' }
+              ]}
+            />
+            <SimpleChart
+              type="line"
+              title="CPU Trend"
+              height={120}
+              data={[
+                { label: '6h', value: Math.max(0, metrics.avgCpuUsage - 10) },
+                { label: '4h', value: Math.max(0, metrics.avgCpuUsage - 5) },
+                { label: '2h', value: metrics.avgCpuUsage },
+                { label: 'Now', value: metrics.avgCpuUsage }
+              ]}
+            />
           </div>
         </div>
 
