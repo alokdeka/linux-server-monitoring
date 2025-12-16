@@ -73,42 +73,7 @@ body {
 
 /* Login page styles - handled by LoginForm component */
 
-/* Page content styles */
-.dashboard-page,
-.servers-page,
-.alerts-page,
-.server-management-page,
-.settings-page {
-  padding: 0;
-  animation: fadeIn 0.3s ease-out;
-  width: 100%;
-}
 
-.dashboard-page h1,
-.servers-page h1,
-.alerts-page h1,
-.server-management-page h1,
-.settings-page h1 {
-  margin: 0;
-  color: var(--text-primary);
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  transition: color 0.3s ease;
-}
-
-.dashboard-page p,
-.servers-page p,
-.alerts-page p,
-.server-management-page p,
-.settings-page p {
-  color: var(--text-muted);
-  font-size: 1rem;
-  line-height: 1.5;
-  font-weight: 400;
-  margin: 0;
-  transition: color 0.3s ease;
-}
 
 @keyframes fadeIn {
   from {

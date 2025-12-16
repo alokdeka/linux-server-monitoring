@@ -144,43 +144,6 @@ const MainContent = ({
         onMobileMenuToggle={onMobileMenuToggle}
       />
 
-      <div className="main-header">
-        <div className="main-header-left">
-          <div>
-            <h1 className="main-header-title">{pageTitle}</h1>
-            {pageSubtitle && (
-              <p className="main-header-subtitle">{pageSubtitle}</p>
-            )}
-          </div>
-        </div>
-        <div className="main-header-right">
-          <nav className="breadcrumb" aria-label="Breadcrumb">
-            {getBreadcrumbs().map((crumb, index) => (
-              <div key={crumb.path} className="breadcrumb-item">
-                {index > 0 && (
-                  <span className="breadcrumb-separator" aria-hidden="true">
-                    /
-                  </span>
-                )}
-                {crumb.current ? (
-                  <span className="breadcrumb-current" aria-current="page">
-                    {crumb.label}
-                  </span>
-                ) : (
-                  <a
-                    href={crumb.path}
-                    className="breadcrumb-link"
-                    aria-label={`Navigate to ${crumb.label}`}
-                  >
-                    {crumb.label}
-                  </a>
-                )}
-              </div>
-            ))}
-          </nav>
-        </div>
-      </div>
-
       <div className="content-wrapper">
         {isLoading ? (
           <div className="main-content-loading">

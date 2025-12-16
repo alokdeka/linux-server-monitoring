@@ -25,6 +25,51 @@ const initialState: AuthState = {
 };
 
 // Async thunks for authentication actions
+export const checkAuthState = createAsyncThunk(
+  'auth/checkAuthState',
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const tokenExpiry = localStorage.getItem('tokenExpiry');
+      const userStr = localStorage.getItem('user');
+
+      if (token && tokenExpiry) {
+        const expiryDate = new Date(tokenExpiry);
+        const now = new Date();
+
+        if (expiryDate > now) {
+          let user = null;
+          if (userStr) {
+            try {
+              user = JSON.parse(userStr);
+            } catch {
+              localStorage.removeItem('user');
+            }
+          }
+
+          return {
+            token,
+            tokenExpiry,
+            user,
+            isAuthenticated: true,
+          };
+        } else {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('tokenExpiry');
+          localStorage.removeItem('user');
+          throw new Error('Token expired');
+        }
+      } else {
+        throw new Error('No authentication token found');
+      }
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Authentication check failed'
+      );
+    }
+  }
+);
+
 export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials: LoginCredentials, { rejectWithValue }) => {
@@ -119,40 +164,7 @@ const authSlice = createSlice({
       state.user = action.payload;
       localStorage.setItem('user', JSON.stringify(action.payload));
     },
-    checkAuthState: (state) => {
-      const token = localStorage.getItem('authToken');
-      const tokenExpiry = localStorage.getItem('tokenExpiry');
-      const userStr = localStorage.getItem('user');
 
-      if (token && tokenExpiry) {
-        const expiryDate = new Date(tokenExpiry);
-        const now = new Date();
-
-        if (expiryDate > now) {
-          state.token = token;
-          state.tokenExpiry = tokenExpiry;
-          state.isAuthenticated = true;
-
-          if (userStr) {
-            try {
-              state.user = JSON.parse(userStr);
-            } catch {
-              // Invalid user data, clear it
-              localStorage.removeItem('user');
-            }
-          }
-        } else {
-          // Token expired, clear everything
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('tokenExpiry');
-          localStorage.removeItem('user');
-          state.token = null;
-          state.tokenExpiry = null;
-          state.isAuthenticated = false;
-          state.user = null;
-        }
-      }
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -228,9 +240,29 @@ const authSlice = createSlice({
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      // Check auth state cases
+      .addCase(checkAuthState.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(checkAuthState.fulfilled, (state, action) => {
+        state.loading = false;
+        state.token = action.payload.token;
+        state.tokenExpiry = action.payload.tokenExpiry;
+        state.user = action.payload.user;
+        state.isAuthenticated = action.payload.isAuthenticated;
+        state.error = null;
+      })
+      .addCase(checkAuthState.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+        state.isAuthenticated = false;
+        state.token = null;
+        state.tokenExpiry = null;
+        state.user = null;
       });
   },
 });
 
-export const { clearError, setUser, checkAuthState } = authSlice.actions;
+export const { clearError, setUser } = authSlice.actions;
 export default authSlice.reducer;

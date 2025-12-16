@@ -225,25 +225,27 @@ const Settings = () => {
 
   if (!localSettings) {
     return (
-      <div className="settings-page">
-        <div className="page-header">
-          <h1>Settings</h1>
-          <p>Configure dashboard preferences and system settings.</p>
-        </div>
-        <div className="loading-state">
-          {settingsLoading ? 'Loading settings...' : 'Failed to load settings'}
+      <div className="page">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <h2>{settingsLoading ? 'Loading Settings' : 'Failed to Load Settings'}</h2>
+          <p>{settingsLoading ? 'Gathering your preferences...' : 'Unable to load your settings'}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="settings-page">
-      <div className="page-header">
-        <h1>Settings</h1>
-        <p>Configure dashboard preferences and system settings.</p>
-        {settingsError && <div className="error-message">{settingsError}</div>}
-      </div>
+    <div className="page">
+      {settingsError && (
+        <div className="alert alert-error">
+          <div className="alert-icon">⚠️</div>
+          <div>
+            <h3>Error</h3>
+            <p>{settingsError}</p>
+          </div>
+        </div>
+      )}
 
       <div className="settings-tabs">
         <button

@@ -5,9 +5,10 @@
 
 .servers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
   width: 100%;
+  padding: 0;
 }
 
 /* Loading state */
@@ -18,20 +19,23 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  border: 1px solid var(--border-primary);
 }
 
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #2d3748;
-  border-top: 3px solid #3b82f6;
+  border: 3px solid var(--border-primary);
+  border-top: 3px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
 
 .server-grid-loading p {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 1rem;
   margin: 0;
 }
@@ -94,6 +98,9 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  border: 1px solid var(--border-primary);
 }
 
 .empty-icon {
@@ -103,14 +110,14 @@
 }
 
 .server-grid-empty h3 {
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
 }
 
 .server-grid-empty p {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 1rem;
   margin: 0 0 2rem 0;
   max-width: 500px;
@@ -125,7 +132,7 @@
 }
 
 .primary-button {
-  background: #3b82f6;
+  background: var(--color-primary);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -137,7 +144,7 @@
 }
 
 .primary-button:hover {
-  background: #2563eb;
+  opacity: 0.9;
   transform: translateY(-1px);
 }
 
@@ -147,8 +154,8 @@
 
 .secondary-button {
   background: transparent;
-  color: #94a3b8;
-  border: 1px solid #2d3748;
+  color: var(--text-muted);
+  border: 1px solid var(--border-primary);
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 0.875rem;
@@ -158,8 +165,8 @@
 }
 
 .secondary-button:hover {
-  border-color: #4a5568;
-  color: #ffffff;
+  border-color: var(--border-secondary);
+  color: var(--text-primary);
   transform: translateY(-1px);
 }
 
