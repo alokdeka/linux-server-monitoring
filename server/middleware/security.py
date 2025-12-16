@@ -90,6 +90,12 @@ class SecurityMiddleware:
                 }
             )
         
+        # Skip security validation for documentation endpoints
+        if self._is_docs_endpoint(request):
+            response = await call_next(request)
+            self._add_security_headers(response)
+            return response
+        
         # Validate request for malicious content
         try:
             await self._validate_request_security(request)
@@ -140,6 +146,19 @@ class SecurityMiddleware:
         if self.failed_attempts[ip] >= self.max_failed_attempts:
             self.blocked_ips[ip] = datetime.utcnow()
             logger.warning(f"IP {ip} blocked due to {self.failed_attempts[ip]} failed attempts")
+    
+    def _is_docs_endpoint(self, request: Request) -> bool:
+        """
+        Check if the request is for documentation endpoints.
+        
+        Args:
+            request: The FastAPI request to check
+            
+        Returns:
+            True if it's a docs endpoint, False otherwise
+        """
+        docs_paths = ['/docs', '/redoc', '/openapi.json', '/favicon.ico']
+        return any(request.url.path.startswith(path) for path in docs_paths)
     
     async def _validate_request_security(self, request: Request):
         """
@@ -280,7 +299,16 @@ class SecurityMiddleware:
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Content-Security-Policy"] = "default-src 'self'"
+        
+        # More permissive CSP for Swagger UI to work with CDN resources
+        csp_policy = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "img-src 'self' data: https://fastapi.tiangolo.com; "
+            "font-src 'self' https://cdn.jsdelivr.net"
+        )
+        response.headers["Content-Security-Policy"] = csp_policy
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
 
 

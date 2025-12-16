@@ -36,14 +36,8 @@ class DatabaseManager:
         )
         
         if not url:
-            # Default development configuration
-            host = os.getenv("DB_HOST", "localhost")
-            port = os.getenv("DB_PORT", "5432")
-            database = os.getenv("DB_NAME", "monitoring")
-            username = os.getenv("DB_USER", "monitoring")
-            password = os.getenv("DB_PASSWORD", "monitoring")
-            
-            url = f"postgresql://{username}:{password}@{host}:{port}/{database}"
+            # Default to SQLite for local development
+            url = "sqlite:///./monitoring.db"
             
         return url
     
@@ -113,8 +107,9 @@ class DatabaseManager:
     def health_check(self) -> bool:
         """Check database connectivity."""
         try:
+            from sqlalchemy import text
             with self.get_session() as session:
-                session.execute("SELECT 1")
+                session.execute(text("SELECT 1"))
             return True
         except Exception as e:
             logger.error(f"Database health check failed: {e}")
