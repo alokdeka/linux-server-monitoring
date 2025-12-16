@@ -5,6 +5,10 @@
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 [![React](https://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
 
+[![Docker Hub](https://img.shields.io/docker/pulls/alokdekadev/linux-server-monitoring?label=Docker%20Pulls&logo=docker)](https://hub.docker.com/r/alokdekadev/linux-server-monitoring)
+[![Docker Image Size](https://img.shields.io/docker/image-size/alokdekadev/linux-server-monitoring/server?label=Server%20Size)](https://hub.docker.com/r/alokdekadev/linux-server-monitoring)
+[![Docker Image Size](https://img.shields.io/docker/image-size/alokdekadev/linux-server-monitoring/dashboard?label=Dashboard%20Size)](https://hub.docker.com/r/alokdekadev/linux-server-monitoring)
+
 **Monitor all your Linux servers from one beautiful dashboard!**
 
 A complete, easy-to-use monitoring solution that watches your servers 24/7 and alerts you when something goes wrong. Perfect for beginners and professionals alike.
@@ -560,7 +564,8 @@ This comprehensive local development setup allows developers to:
 
 ### Core Documentation
 
-- **[Complete Docker Deployment Guide](DOCKER_DEPLOYMENT.md)** - 🐳 **Comprehensive Docker setup and production guide**
+- **[🐳 Docker Hub Deployment Guide](DOCKER_HUB_DEPLOYMENT.md)** - **Fastest deployment with pre-built images**
+- **[Complete Docker Deployment Guide](DOCKER_DEPLOYMENT.md)** - Build from source and production guide
 - **[Dashboard User Guide](dashboard/USER_GUIDE.md)** - Complete user guide with feature explanations
 - **[Dashboard API Documentation](DASHBOARD_API.md)** - Comprehensive API reference
 - **[Deployment Guide](DEPLOYMENT.md)** - Manual installation and production deployment instructions
@@ -574,43 +579,43 @@ This comprehensive local development setup allows developers to:
 
 ### Quick Links
 
-- **[🐳 Docker Deployment Guide](DOCKER_DEPLOYMENT.md)** - Complete Docker setup and production guide
+- **[🚀 Docker Hub Images](DOCKER_HUB_DEPLOYMENT.md)** - Fastest deployment with pre-built images
+- **[🐳 Docker Build Guide](DOCKER_DEPLOYMENT.md)** - Build from source and production guide
 - **[Getting Started](dashboard/README.md#quick-start)** - Set up the dashboard in minutes
 - **[API Endpoints](DASHBOARD_API.md#authentication)** - Available API endpoints
 - **[Troubleshooting](dashboard/USER_GUIDE.md#troubleshooting)** - Common issues and solutions
 
 ## 🚀 Quick Start (5 Minutes Setup!)
 
-### Option 1: Super Easy Docker Setup (Recommended for Beginners)
+### Option 1: Docker Hub Images (Fastest - Recommended)
 
-**Step 1: Get the code**
+**Step 1: Download and configure**
 
 ```bash
-git clone git@github.com:alokdeka/linux-server-monitoring.git
-cd linux-server-monitoring
+# Download Docker Hub compose file
+curl -sSL https://raw.githubusercontent.com/alokdeka/linux-server-monitoring/main/docker-compose.hub.yml -o docker-compose.yml
+
+# Create environment configuration
+cat > .env << 'EOF'
+POSTGRES_PASSWORD=your_secure_password_here
+DASHBOARD_API_URL=http://localhost:8000
+DASHBOARD_WS_URL=ws://localhost:8000
+EOF
 ```
 
-**Step 2: Configure (just copy and edit one file)**
+**Important**: Change `your_secure_password_here` to a secure password!
+
+**Step 2: Start everything**
 
 ```bash
-cp .env.example .env
-# Edit .env with your preferred password (use any text editor)
-nano .env
-```
-
-**Important**: Change the `POSTGRES_PASSWORD` to a secure password!
-
-**Step 3: Start everything**
-
-```bash
-# Start all services (server, dashboard, database)
+# Pull and start all services (uses pre-built Docker Hub images)
 docker compose up -d
 
 # Check if all services are running
 docker compose ps
 ```
 
-**Step 4: Create admin user**
+**Step 3: Create admin user**
 
 ```bash
 # Create your admin user for the dashboard
@@ -619,24 +624,12 @@ docker compose exec server python server/cli/create_admin.py
 
 Follow the prompts to set up your admin username, email, and password.
 
-**Step 5: Verify everything is working**
-
-```bash
-# Test API health
-curl http://localhost:8000/api/v1/health
-# Should return: {"status":"healthy"}
-
-# Check service status
-docker compose ps
-# All services should show "Up" and "healthy"
-```
-
-**Step 6: Open your dashboard**
+**Step 4: Open your dashboard**
 
 - Go to: `http://localhost:3000` in your web browser
 - Login with the credentials you just created
 
-**Step 7: Add your first server**
+**Step 5: Add your first server**
 
 - Click "Server Management" in the dashboard
 - Click "Register New Server"
@@ -650,15 +643,44 @@ docker compose ps
 - Run this command **on the server you want to monitor** (as root/sudo)
 - The server will appear in your dashboard within 1-2 minutes!
 
-**That's it! 🎉** Your monitoring system is running!
+**That's it! 🎉** Your monitoring system is running with pre-built Docker Hub images!
 
-> 📖 **Need more details?** Check our [Complete Docker Deployment Guide](DOCKER_DEPLOYMENT.md) for advanced configuration, troubleshooting, and production setup.
+> 📖 **Need more details?** Check our [Docker Hub Deployment Guide](DOCKER_HUB_DEPLOYMENT.md) for advanced configuration and production setup.
 
-### Option 2: Local Development Setup (For Developers)
+### Option 2: Build from Source (For Customization)
+
+**Step 1: Get the code**
+
+```bash
+git clone git@github.com:alokdeka/linux-server-monitoring.git
+cd linux-server-monitoring
+```
+
+**Step 2: Configure and build**
+
+```bash
+cp .env.example .env
+# Edit .env with your preferred password
+nano .env
+
+# Build and start everything
+docker compose up -d
+```
+
+**Step 3: Create admin user and access**
+
+```bash
+docker compose exec server python server/cli/create_admin.py
+# Then go to http://localhost:3000
+```
+
+> 📖 **For detailed build instructions:** Check our [Complete Docker Deployment Guide](DOCKER_DEPLOYMENT.md)
+
+### Option 3: Local Development Setup (For Developers)
 
 **Want to develop or customize the system?** See our [Local Development Setup](#-local-development-setup-without-docker) section below for running everything locally without Docker.
 
-### Option 3: Manual Production Setup
+### Option 4: Manual Production Setup
 
 Follow our detailed [Installation Guide](DEPLOYMENT.md#manual-installation) for step-by-step manual production installation.
 
@@ -789,48 +811,52 @@ Your Servers → Agents → Central Server → Dashboard → You
 
 ## 🚀 Getting Started
 
-### Quick Deployment with Docker (Recommended)
+### Quick Deployment with Docker Hub (Fastest)
 
-1. **Clone the repository**:
-
-   ```bash
-   git clone git@github.com:alokdeka/linux-server-monitoring.git
-   cd linux-server-monitoring
-   ```
-
-2. **Configure environment**:
+1. **Download and start**:
 
    ```bash
-   cp .env.example .env
-   # Edit .env with your settings (especially POSTGRES_PASSWORD)
-   nano .env
-   ```
+   # Download Docker Hub compose file
+   curl -sSL https://raw.githubusercontent.com/alokdeka/linux-server-monitoring/main/docker-compose.hub.yml -o docker-compose.yml
 
-3. **Start all services**:
+   # Create environment file
+   echo "POSTGRES_PASSWORD=your_secure_password" > .env
 
-   ```bash
+   # Start with pre-built images
    docker compose up -d
    ```
 
-4. **Create admin user**:
+2. **Create admin user**:
 
    ```bash
    docker compose exec server python server/cli/create_admin.py
    ```
 
-5. **Access the dashboard**:
+3. **Access the dashboard**:
 
    - Open http://localhost:3000 in your browser
    - Login with the credentials you created
 
-6. **Install agents on servers**:
+4. **Install agents on servers**:
    ```bash
    # Get installation command from dashboard "Server Management" page
    curl -sSL http://your-server:8000/install-agent.sh | bash -s -- \
      --api-key="your-api-key" --server-url="http://localhost:8000"
    ```
 
-> 📖 **For detailed Docker setup, troubleshooting, and production configuration, see our [Complete Docker Deployment Guide](DOCKER_DEPLOYMENT.md)**
+> 📖 **For detailed Docker Hub deployment, see our [Docker Hub Deployment Guide](DOCKER_HUB_DEPLOYMENT.md)**
+
+### Build from Source with Docker
+
+```bash
+git clone git@github.com:alokdeka/linux-server-monitoring.git
+cd linux-server-monitoring
+cp .env.example .env
+# Edit .env with your settings
+docker compose up -d
+```
+
+> 📖 **For detailed build instructions, see our [Complete Docker Deployment Guide](DOCKER_DEPLOYMENT.md)**
 
 ### Local Development Setup
 
