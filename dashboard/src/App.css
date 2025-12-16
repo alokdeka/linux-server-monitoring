@@ -141,3 +141,13 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
+/* Authentication loading state */
+.auth-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #0f1419;
+  font-size: 1.1rem;
+  color: #94a3b8;
+}

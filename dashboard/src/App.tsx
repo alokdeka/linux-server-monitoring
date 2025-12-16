@@ -5,8 +5,10 @@ import {
   Navigate,
 } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import type { RootState } from './store';
+import { useEffect } from 'react';
+import type { RootState, AppDispatch } from './store';
 import { toggleSidebar } from './store/slices/appSlice';
+import { checkAuthState, logoutUser } from './store/slices/authSlice';
 
 // Layout components
 import Sidebar from './components/layout/Sidebar';
@@ -27,22 +29,26 @@ import Login from './pages/Login';
 import './App.css';
 
 function App() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { sidebarOpen } = useSelector((state: RootState) => state.app);
+  const { user } = useSelector((state: RootState) => state.auth);
 
-  // Mock authentication state - will be replaced with real auth in task 3
-  const isAuthenticated = true;
-  const user = isAuthenticated
-    ? { name: 'Admin User', email: 'admin@example.com' }
-    : undefined;
+  // Check authentication state on app load
+  useEffect(() => {
+    dispatch(checkAuthState());
+  }, [dispatch]);
 
   const handleSidebarToggle = () => {
     dispatch(toggleSidebar());
   };
 
-  const handleLogout = () => {
-    // Logout logic will be implemented in task 3
-    console.log('Logout clicked');
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if logout fails, the auth state will be cleared
+    }
   };
 
   return (
@@ -56,7 +62,7 @@ function App() {
           <Route
             path="/"
             element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ProtectedRoute>
                 <div className="app-layout">
                   <div className="app-body">
                     <Sidebar
@@ -65,7 +71,11 @@ function App() {
                     />
                     <MainContent
                       sidebarOpen={sidebarOpen}
-                      user={user}
+                      user={
+                        user
+                          ? { name: user.username, email: user.email }
+                          : undefined
+                      }
                       onLogout={handleLogout}
                     />
                   </div>

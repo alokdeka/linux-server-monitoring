@@ -8,6 +8,7 @@ import type {
   DashboardSettings,
   LoginCredentials,
   AuthToken,
+  User,
 } from '../types';
 
 export interface ServerRegistrationData {
@@ -37,6 +38,7 @@ export interface ApiClient {
   login(credentials: LoginCredentials): Promise<AuthToken>;
   logout(): Promise<void>;
   refreshToken(): Promise<AuthToken>;
+  getCurrentUser(): Promise<User>;
 
   // Alerts
   getAlerts(): Promise<Alert[]>;
@@ -49,6 +51,41 @@ export interface ApiClient {
 
 // Basic API client implementation (to be expanded in later tasks)
 class ApiClientImpl implements ApiClient {
+  private baseUrl = import.meta.env?.VITE_API_URL || 'http://localhost:8000';
+
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const token = localStorage.getItem('authToken');
+
+    const config: RequestInit = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    const response = await fetch(`${this.baseUrl}${endpoint}`, config);
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Token expired or invalid
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('tokenExpiry');
+        localStorage.removeItem('user');
+        throw new Error('Authentication required');
+      }
+
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+
   async getServers(): Promise<Server[]> {
     // Implementation will be added in later tasks
     return [];
@@ -64,18 +101,43 @@ class ApiClientImpl implements ApiClient {
     return { apiKey: '' };
   }
 
-  async login(): Promise<AuthToken> {
-    // Implementation will be added in later tasks
-    return { token: '', expiresAt: '' };
+  async login(credentials: LoginCredentials): Promise<AuthToken> {
+    const response = await this.request<{
+      access_token: string;
+      expires_at: string;
+    }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+
+    return {
+      token: response.access_token,
+      expiresAt: response.expires_at,
+    };
   }
 
   async logout(): Promise<void> {
-    // Implementation will be added in later tasks
+    await this.request('/auth/logout', {
+      method: 'POST',
+    });
   }
 
   async refreshToken(): Promise<AuthToken> {
-    // Implementation will be added in later tasks
-    return { token: '', expiresAt: '' };
+    const response = await this.request<{
+      access_token: string;
+      expires_at: string;
+    }>('/auth/refresh', {
+      method: 'POST',
+    });
+
+    return {
+      token: response.access_token,
+      expiresAt: response.expires_at,
+    };
+  }
+
+  async getCurrentUser(): Promise<User> {
+    return this.request<User>('/auth/me');
   }
 
   async getAlerts(): Promise<Alert[]> {
