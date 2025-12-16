@@ -1,6 +1,16 @@
-# Server Health Monitoring Dashboard
+# 📊 Server Monitoring Dashboard
 
-A modern, responsive React TypeScript dashboard for monitoring Linux server health and metrics in real-time. This web interface provides comprehensive visualization and management capabilities for the Linux Server Health Monitoring System.
+**Your beautiful, easy-to-use web interface for monitoring all your servers!**
+
+This is the web dashboard where you'll spend most of your time. It shows you everything about your servers in real-time with beautiful charts and instant alerts.
+
+## 🎯 What You Can Do
+
+- 👀 **See all your servers at a glance** - Green = good, Red = needs attention
+- 📈 **View real-time charts** - CPU, memory, disk usage updating every 30 seconds
+- 🚨 **Get instant alerts** - Know immediately when something goes wrong
+- ⚙️ **Manage everything** - Add servers, change settings, configure alerts
+- 📱 **Use on any device** - Works perfectly on desktop, tablet, and phone
 
 ## 🚀 Features
 
@@ -41,64 +51,154 @@ A modern, responsive React TypeScript dashboard for monitoring Linux server heal
 - **Notification management** with webhook URL configuration
 - **User profile management** with preference persistence
 
-## 🛠 Development Setup
+## 🚀 Quick Setup for Developers
 
-### Prerequisites
+**Want to customize the dashboard or contribute? Here's how to get started!**
 
-- **Node.js 18+** (LTS recommended)
-- **npm 9+** or **yarn 1.22+**
-- **Git** for version control
-- **Docker** (optional, for containerized development)
+### What You Need
 
-### Quick Start
+- **Node.js 18 or newer** - [Download here](https://nodejs.org/)
+- **Basic knowledge of React** (helpful but not required)
 
-1. **Clone the repository:**
+### Super Quick Start
+
+1. **Get the code:**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/your-username/linux-server-monitoring.git
    cd linux-server-monitoring/dashboard
    ```
 
-2. **Install dependencies:**
+2. **Install everything:**
 
    ```bash
    npm install
    ```
 
-3. **Set up environment variables:**
+3. **Configure it:**
 
    ```bash
    cp .env.example .env
-   # Edit .env with your API server configuration
    ```
 
-4. **Start the development server:**
+   **Edit .env file:**
+
+   ```bash
+   # Where your monitoring server is running
+   VITE_API_BASE_URL=http://localhost:8000
+   VITE_WS_BASE_URL=ws://localhost:8000
+
+   # Dashboard title (change to whatever you want)
+   VITE_APP_TITLE=My Server Monitor
+   ```
+
+4. **Start developing:**
 
    ```bash
    npm run dev
    ```
 
 5. **Open your browser:**
-   Navigate to `http://localhost:5173` (Vite default port)
+   Go to `http://localhost:5173` and start coding!
 
-### Environment Configuration
+**🎉 That's it!** The dashboard will automatically reload when you make changes.
 
-Create a `.env` file in the dashboard directory:
+## 📖 How to Use the Dashboard (User Guide)
 
-```bash
-# API Configuration
-VITE_API_BASE_URL=http://localhost:8000
-VITE_WS_BASE_URL=ws://localhost:8000
+### 🏠 Dashboard Home Page
 
-# Application Settings
-VITE_APP_TITLE=Server Monitoring Dashboard
-VITE_REFRESH_INTERVAL=30000
-VITE_ENABLE_DEBUG=false
+**What you see:** Overview of all your servers with key metrics
 
-# Development Settings
-VITE_MOCK_API=false
-VITE_LOG_LEVEL=info
-```
+- **Green servers** = Everything is good ✅
+- **Yellow servers** = Warning - check soon ⚠️
+- **Red servers** = Critical - needs immediate attention 🚨
+- **Gray servers** = Offline or not responding 💤
+
+**Key numbers at the top:**
+
+- **Total Servers** - How many servers you're monitoring
+- **Online Servers** - How many are currently running
+- **Active Alerts** - How many problems need attention
+- **Average CPU** - Overall CPU usage across all servers
+
+### 🖥️ Servers Page
+
+**What you see:** Detailed list of all your servers
+
+**For each server you can see:**
+
+- **Status** (Online/Offline/Warning)
+- **CPU Usage** - How busy the processor is
+- **Memory Usage** - How much RAM is being used
+- **Disk Usage** - How full the hard drives are
+- **Last Seen** - When it last reported in
+
+**Click on any server** to see detailed charts and history!
+
+### 🚨 Alerts Page
+
+**What you see:** All current and past alerts
+
+**Alert types:**
+
+- **🔴 Critical** - Server is down or has serious problems
+- **🟡 Warning** - Server is having minor issues
+- **🟢 Resolved** - Problem was fixed
+
+**What to do with alerts:**
+
+1. **Click on an alert** to see details
+2. **Check what caused it** (high CPU, full disk, etc.)
+3. **Fix the problem** on your server
+4. **Mark as resolved** when done
+
+### ⚙️ Server Management Page
+
+**What you see:** Tools to add new servers
+
+**To add a new server:**
+
+1. **Enter server details** (name, IP address, description)
+2. **Click "Generate API Key"**
+3. **Copy the installation command**
+4. **Run the command on your server**
+5. **Wait a few minutes** - your server will appear in the dashboard!
+
+### 🔧 Settings Page
+
+**What you see:** Customize how the dashboard works
+
+**Important settings:**
+
+- **Alert Thresholds** - When to send alerts (CPU > 80%, Memory > 85%, etc.)
+- **Refresh Interval** - How often to update (default: 30 seconds)
+- **Notifications** - Add Slack/email webhooks for alerts
+- **Theme** - Switch between light and dark mode
+
+### 💡 Pro Tips
+
+**🔍 Quick Health Check:**
+
+- Green dashboard = All good!
+- Any red/yellow = Check the Alerts page
+
+**📊 Reading Charts:**
+
+- **Spikes** = Temporary high usage (usually okay)
+- **Sustained high levels** = Potential problem
+- **Flat lines at 0** = Server might be offline
+
+**🚨 Alert Best Practices:**
+
+- **Don't ignore warnings** - They often become critical
+- **Set reasonable thresholds** - Too sensitive = too many alerts
+- **Check trends** - Is usage gradually increasing?
+
+**⚡ Performance Tips:**
+
+- **Use the mobile app** - Dashboard works great on phones
+- **Bookmark important servers** - Click on them frequently
+- **Set up notifications** - Get alerts via Slack/email
 
 ### Development Scripts
 

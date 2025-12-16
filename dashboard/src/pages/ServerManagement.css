@@ -1,9 +1,38 @@
 .server-management-page {
   padding: 0;
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.6s ease-out;
   width: 100%;
   min-height: 100vh;
   box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.server-management-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(16, 185, 129, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(59, 130, 246, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(245, 158, 11, 0.05) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+  z-index: -1;
 }
 
 .page-header {
@@ -14,8 +43,12 @@
 .page-header h1 {
   margin-bottom: 0.5rem;
   font-size: 2rem;
-  font-weight: 600;
-  color: #ffffff;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff, #e2e8f0, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .page-header p {
@@ -34,18 +67,58 @@
 
 .registration-section,
 .api-keys-section {
-  background: #1a202c;
-  border: 1px solid #2d3748;
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(26, 32, 44, 0.95),
+    rgba(45, 55, 72, 0.8)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.registration-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #059669);
+  opacity: 0.8;
+}
+
+.api-keys-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  opacity: 0.8;
+}
+
+.registration-section:hover,
+.api-keys-section:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 .registration-section h2,
 .api-keys-section h2 {
   margin: 0 0 1.5rem 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #ffffff;
+  font-size: 1.375rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffffff, #e2e8f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .registration-form {
@@ -86,19 +159,39 @@
 }
 
 .register-btn {
-  background: #4299e1;
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
+  padding: 0.875rem 1.75rem;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.register-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .register-btn:hover {
-  background: #3182ce;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.register-btn:hover::before {
+  opacity: 1;
 }
 
 .api-key-list {
@@ -108,13 +201,43 @@
 }
 
 .api-key-item {
-  background: #0f1419;
-  border: 1px solid #2d3748;
-  border-radius: 8px;
-  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 20, 25, 0.8),
+    rgba(26, 32, 44, 0.6)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.api-key-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.api-key-item:hover {
+  transform: translateX(8px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.api-key-item:hover::before {
+  opacity: 1;
 }
 
 .key-info h3 {
