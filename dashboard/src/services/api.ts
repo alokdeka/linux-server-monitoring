@@ -212,6 +212,12 @@ class ApiClientImpl implements ApiClient {
         throw new Error('Access forbidden');
       case 404:
         throw new Error('Resource not found');
+      case 422:
+        // Handle validation errors gracefully - often means no data available
+        if (endpoint.includes('/metrics')) {
+          throw new Error('No metrics data available for this server');
+        }
+        throw new Error('Invalid request data');
       case 429:
         throw new Error('Too many requests. Please try again later.');
       case 500:
@@ -296,63 +302,115 @@ class ApiClientImpl implements ApiClient {
     serverId: string,
     timeRange: string
   ): Promise<ServerMetrics[]> {
-    const response = await this.request<{
-      metrics: Array<{
-        id: number;
-        server_id: string;
-        timestamp: string;
-        cpu_usage: number;
-        memory_total: number;
-        memory_used: number;
-        memory_percentage: number;
-        disk_usage: Array<{
-          device?: string;
-          mountpoint: string;
-          total: number;
-          used: number;
-          percentage: number;
-        }>;
-        load_1min: number;
-        load_5min: number;
-        load_15min: number;
-        uptime: number;
-        failed_services: Array<{
-          name: string;
-          status: string;
-          since?: string;
-        }>;
-      }>;
-    }>(`/api/v1/dashboard/servers/${serverId}/metrics?timeRange=${timeRange}`);
+    try {
+      // Convert timeRange to start_time and end_time
+      const now = new Date();
+      const endTime = now.toISOString();
+      let startTime: string;
 
-    // Transform database response to frontend ServerMetrics interface
-    return response.metrics.map((metric) => ({
-      serverId: metric.server_id,
-      timestamp: metric.timestamp,
-      cpuUsage: metric.cpu_usage,
-      memory: {
-        total: metric.memory_total,
-        used: metric.memory_used,
-        percentage: metric.memory_percentage,
-      },
-      diskUsage: metric.disk_usage.map((disk) => ({
-        device: disk.device || disk.mountpoint,
-        mountpoint: disk.mountpoint,
-        total: disk.total,
-        used: disk.used,
-        percentage: disk.percentage,
-      })),
-      loadAverage: {
-        oneMin: metric.load_1min,
-        fiveMin: metric.load_5min,
-        fifteenMin: metric.load_15min,
-      },
-      uptime: metric.uptime,
-      failedServices: metric.failed_services.map((service) => ({
-        name: service.name,
-        status: service.status,
-        timestamp: service.since || metric.timestamp,
-      })),
-    }));
+      switch (timeRange) {
+        case '1h':
+          startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+          break;
+        case '6h':
+          startTime = new Date(
+            now.getTime() - 6 * 60 * 60 * 1000
+          ).toISOString();
+          break;
+        case '24h':
+          startTime = new Date(
+            now.getTime() - 24 * 60 * 60 * 1000
+          ).toISOString();
+          break;
+        case '7d':
+          startTime = new Date(
+            now.getTime() - 7 * 24 * 60 * 60 * 1000
+          ).toISOString();
+          break;
+        default:
+          startTime = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // Default to 1h
+      }
+
+      const params = new URLSearchParams({
+        start_time: startTime,
+        end_time: endTime,
+        interval_minutes: '5',
+      });
+
+      const response = await this.request<{
+        metrics: Array<{
+          id: number;
+          server_id: string;
+          timestamp: string;
+          cpu_usage: number;
+          memory_total: number;
+          memory_used: number;
+          memory_percentage: number;
+          disk_usage: Array<{
+            device?: string;
+            mountpoint: string;
+            total: number;
+            used: number;
+            percentage: number;
+          }>;
+          load_1min: number;
+          load_5min: number;
+          load_15min: number;
+          uptime: number;
+          failed_services: Array<{
+            name: string;
+            status: string;
+            since?: string;
+          }>;
+        }>;
+      }>(`/api/v1/dashboard/servers/${serverId}/metrics?${params.toString()}`);
+
+      // If no metrics available, return empty array
+      if (!response.metrics || response.metrics.length === 0) {
+        return [];
+      }
+
+      // Transform database response to frontend ServerMetrics interface
+      return response.metrics.map((metric) => ({
+        serverId: metric.server_id,
+        timestamp: metric.timestamp,
+        cpuUsage: metric.cpu_usage,
+        memory: {
+          total: metric.memory_total,
+          used: metric.memory_used,
+          percentage: metric.memory_percentage,
+        },
+        diskUsage: metric.disk_usage.map((disk) => ({
+          device: disk.device || disk.mountpoint,
+          mountpoint: disk.mountpoint,
+          total: disk.total,
+          used: disk.used,
+          percentage: disk.percentage,
+        })),
+        loadAverage: {
+          oneMin: metric.load_1min,
+          fiveMin: metric.load_5min,
+          fifteenMin: metric.load_15min,
+        },
+        uptime: metric.uptime,
+        failedServices: metric.failed_services.map((service) => ({
+          name: service.name,
+          status: service.status,
+          timestamp: service.since || metric.timestamp,
+        })),
+      }));
+    } catch (error) {
+      // If metrics are not available (422 error or other issues), return empty array
+      // This allows the UI to handle servers that are registered but not actively monitored
+      if (
+        error instanceof Error &&
+        error.message.includes('No metrics data available')
+      ) {
+        return [];
+      }
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   async registerServer(

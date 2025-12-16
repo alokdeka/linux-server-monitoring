@@ -45,8 +45,19 @@ export const fetchCurrentMetrics = createAsyncThunk(
   async (serverIds: string[], { rejectWithValue }) => {
     try {
       const metricsPromises = serverIds.map(async (serverId) => {
-        const metrics = await apiClient.getServerMetrics(serverId, '1h');
-        return { serverId, metrics: metrics[metrics.length - 1] }; // Get latest metrics
+        try {
+          const metrics = await apiClient.getServerMetrics(serverId, '1h');
+          return { serverId, metrics: metrics[metrics.length - 1] }; // Get latest metrics
+        } catch (error) {
+          // Silently handle servers without metrics data
+          if (
+            error instanceof Error &&
+            error.message.includes('No metrics data available')
+          ) {
+            return { serverId, metrics: null };
+          }
+          throw error; // Re-throw unexpected errors
+        }
       });
 
       const results = await Promise.allSettled(metricsPromises);
