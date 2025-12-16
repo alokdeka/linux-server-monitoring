@@ -79,6 +79,10 @@
   font-weight: 700;
   margin: 0 0 0.5rem 0;
   color: var(--text-primary);
+  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .servers-header-content p {

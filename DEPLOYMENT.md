@@ -124,21 +124,26 @@ monitoring_postgres_1    docker-entrypoint.sh postgres   Up      5432/tcp
 monitoring_server_1      python server/main.py           Up      0.0.0.0:8000->8000/tcp
 ```
 
-### Step 5: Access Your Dashboard
+### Step 5: Create Admin User
+
+Before you can access the dashboard, you need to create an admin user:
+
+```bash
+# Create your admin user
+python server/cli/create_admin.py
+```
+
+Follow the prompts to set up your admin username, email, and secure password.
+
+### Step 6: Access Your Dashboard
 
 1. **Open your web browser**
 2. **Go to:** `http://localhost:3000` (or `http://your-server-ip:3000` if on a remote server)
-3. **Login with:**
-   - Username: `admin`
-   - Password: `admin`
+3. **Login with the credentials you created in Step 5**
 
-**🔒 IMPORTANT:** Change the default password immediately!
+**🔒 Security Tip:** Use a strong password with at least 8 characters!
 
-- Click your name in the top right
-- Go to "Settings"
-- Change your password
-
-### Step 6: Test Everything Works
+### Step 7: Test Everything Works
 
 1. **Check the dashboard loads** - You should see charts and server information
 2. **Check the API works** - Run this command:
@@ -511,13 +516,11 @@ sudo systemctl restart monitoring-agent
 **Solutions:**
 
 ```bash
-# 1. Reset admin password
-docker-compose exec server python -c "
-from server.auth.manager import AuthManager
-auth = AuthManager()
-auth.create_user('admin', 'newpassword123', 'admin@example.com', is_admin=True)
-print('Admin password reset to: newpassword123')
-"
+# 1. Create or reset admin user
+python server/cli/create_admin.py
+
+# If using Docker:
+docker-compose exec server python server/cli/create_admin.py
 
 # 2. Check if user exists
 docker-compose exec postgres psql -U monitoring_user -d monitoring -c "SELECT username FROM dashboard_users;"

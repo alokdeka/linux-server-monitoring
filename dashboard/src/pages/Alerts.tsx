@@ -6,6 +6,7 @@ import {
 } from '../components/alerts';
 import { useAppSelector } from '../store/hooks';
 import type { Alert } from '../types';
+import './Dashboard.css'; // For shared page header styles
 import './Alerts.css';
 
 const Alerts = () => {
@@ -40,15 +41,47 @@ const Alerts = () => {
   }).length;
 
   return (
-    <div className="page">
+    <div className="alerts-page">
+      {/* Page Header */}
+      <div className="dashboard-page-header">
+        <div className="dashboard-header-content">
+          <h1>Alerts</h1>
+          <p>Monitor and manage system alerts and notifications</p>
+        </div>
+        <div className="dashboard-header-stats">
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Critical</span>
+            <span className="dashboard-stat-value dashboard-critical">
+              {criticalCount}
+            </span>
+          </div>
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Warning</span>
+            <span className="dashboard-stat-value dashboard-warning">
+              {warningCount}
+            </span>
+          </div>
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Resolved Today</span>
+            <span className="dashboard-stat-value dashboard-online">
+              {resolvedTodayCount}
+            </span>
+          </div>
+        </div>
+      </div>
 
       <div className="alert-stats">
         <div className="stat-card">
           <div className="stat-icon critical">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
           <div className="stat-content">
@@ -59,10 +92,15 @@ const Alerts = () => {
 
         <div className="stat-card">
           <div className="stat-icon warning">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-              <path d="M12 9v4"/>
-              <path d="m12 17 .01 0"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <path d="M12 9v4" />
+              <path d="m12 17 .01 0" />
             </svg>
           </div>
           <div className="stat-content">
@@ -73,9 +111,14 @@ const Alerts = () => {
 
         <div className="stat-card">
           <div className="stat-icon success">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22,4 12,14.01 9,11.01"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22,4 12,14.01 9,11.01" />
             </svg>
           </div>
           <div className="stat-content">

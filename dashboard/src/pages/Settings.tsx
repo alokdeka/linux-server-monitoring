@@ -9,6 +9,7 @@ import {
 } from '../store/slices/appSlice';
 import type { DashboardSettings } from '../types';
 import { useTheme } from '../styles/ThemeProvider';
+import './Dashboard.css'; // For shared page header styles
 import './Settings.css';
 
 interface ValidationErrors {
@@ -225,18 +226,54 @@ const Settings = () => {
 
   if (!localSettings) {
     return (
-      <div className="page">
+      <div className="settings-page">
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <h2>{settingsLoading ? 'Loading Settings' : 'Failed to Load Settings'}</h2>
-          <p>{settingsLoading ? 'Gathering your preferences...' : 'Unable to load your settings'}</p>
+          <h2>
+            {settingsLoading ? 'Loading Settings' : 'Failed to Load Settings'}
+          </h2>
+          <p>
+            {settingsLoading
+              ? 'Gathering your preferences...'
+              : 'Unable to load your settings'}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page">
+    <div className="settings-page">
+      {/* Page Header */}
+      <div className="dashboard-page-header">
+        <div className="dashboard-header-content">
+          <h1>Settings</h1>
+          <p>Configure dashboard preferences and system settings</p>
+        </div>
+        <div className="dashboard-header-stats">
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Theme</span>
+            <span className="dashboard-stat-value">
+              {localSettings.display.theme}
+            </span>
+          </div>
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Refresh</span>
+            <span className="dashboard-stat-value">
+              {localSettings.refreshInterval / 1000}s
+            </span>
+          </div>
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Notifications</span>
+            <span
+              className={`dashboard-stat-value ${localSettings.notifications.enabled ? 'dashboard-online' : 'dashboard-warning'}`}
+            >
+              {localSettings.notifications.enabled ? 'On' : 'Off'}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {settingsError && (
         <div className="alert alert-error">
           <div className="alert-icon">⚠️</div>

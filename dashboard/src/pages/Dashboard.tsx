@@ -194,6 +194,28 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
+      {/* Page Header */}
+      <div className="dashboard-page-header">
+        <div className="dashboard-header-content">
+          <h1>Dashboard</h1>
+          <p>System overview and metrics</p>
+        </div>
+        <div className="dashboard-header-stats">
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Total Servers</span>
+            <span className="dashboard-stat-value">{metrics.totalServers}</span>
+          </div>
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Online</span>
+            <span className={`dashboard-stat-value dashboard-online`}>{metrics.onlineServers}</span>
+          </div>
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Alerts</span>
+            <span className={`dashboard-stat-value ${metrics.activeAlertsCount > 0 ? 'dashboard-warning' : 'dashboard-online'}`}>{metrics.activeAlertsCount}</span>
+          </div>
+        </div>
+      </div>
+
       {(serversLoading || alertsLoading) && (
         <div className="sync-indicator">
           <div className="sync-dot"></div>
@@ -216,7 +238,8 @@ const Dashboard = () => {
       )}
 
       {/* Stats Grid */}
-      <div className="dashboardStatsGrid">
+      <div className="dashboard-content">
+        <div className="dashboardStatsGrid">
         <div className="dashboardStatCard">
           <div className="dashboardStatHeader">
             <div className="dashboardStatIcon dashboardStatIconServers">
@@ -467,6 +490,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # Linux Server Health Monitoring Agent Installation Script
+# Usage: curl -sSL https://your-server/install-agent.sh | bash -s -- --api-key="your-key" --server-url="http://your-server:8000"
 
 set -e
 
-# Configuration
+# Default configuration
 AGENT_USER="monitoring"
 AGENT_GROUP="monitoring"
 INSTALL_DIR="/opt/monitoring-agent"
@@ -12,6 +13,11 @@ CONFIG_DIR="/etc/monitoring-agent"
 LOG_DIR="/var/log/monitoring-agent"
 DATA_DIR="/var/lib/monitoring-agent"
 SERVICE_FILE="monitoring-agent.service"
+
+# Installation parameters (will be set by command line arguments)
+API_KEY=""
+SERVER_URL=""
+AGENT_DOWNLOAD_URL=""
 
 # Colors for output
 RED='\033[0;31m'
@@ -32,10 +38,81 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Parse command line arguments
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --api-key)
+                API_KEY="$2"
+                shift 2
+                ;;
+            --server-url)
+                SERVER_URL="$2"
+                shift 2
+                ;;
+            --agent-url)
+                AGENT_DOWNLOAD_URL="$2"
+                shift 2
+                ;;
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                show_help
+                exit 1
+                ;;
+        esac
+    done
+    
+    # Validate required parameters
+    if [[ -z "$API_KEY" ]]; then
+        log_error "API key is required. Use --api-key parameter."
+        exit 1
+    fi
+    
+    if [[ -z "$SERVER_URL" ]]; then
+        log_error "Server URL is required. Use --server-url parameter."
+        exit 1
+    fi
+    
+    # Set default agent download URL if not provided
+    if [[ -z "$AGENT_DOWNLOAD_URL" ]]; then
+        AGENT_DOWNLOAD_URL="${SERVER_URL}/static/agent"
+    fi
+}
+
+# Show help message
+show_help() {
+    cat << EOF
+Linux Server Health Monitoring Agent Installation Script
+
+Usage: $0 --api-key=KEY --server-url=URL [OPTIONS]
+
+Required Parameters:
+  --api-key KEY        API key for authentication with the monitoring server
+  --server-url URL     URL of the monitoring server (e.g., http://localhost:8000)
+
+Optional Parameters:
+  --agent-url URL      Custom URL to download the agent binary
+  -h, --help          Show this help message
+
+Examples:
+  # Install with API key and server URL
+  $0 --api-key="your-api-key-here" --server-url="http://localhost:8000"
+  
+  # Install via curl (recommended)
+  curl -sSL https://your-server/install-agent.sh | bash -s -- --api-key="your-key" --server-url="http://your-server:8000"
+
+EOF
+}
+
 # Check if running as root
 check_root() {
     if [[ $EUID -ne 0 ]]; then
         log_error "This script must be run as root"
+        log_info "Please run with sudo: sudo $0 $*"
         exit 1
     fi
 }
@@ -82,16 +159,34 @@ create_directories() {
     chmod 644 "$CONFIG_DIR"/*
 }
 
-# Install agent binary
+# Download and install agent binary
 install_binary() {
-    log_info "Installing agent binary..."
+    log_info "Downloading and installing agent binary..."
     
-    if [[ ! -f "agent" ]]; then
-        log_error "Agent binary not found. Please ensure 'agent' file is in the current directory."
+    # Try to download the agent binary
+    if command -v curl >/dev/null 2>&1; then
+        log_info "Downloading agent from: $AGENT_DOWNLOAD_URL"
+        if curl -sSL -f "$AGENT_DOWNLOAD_URL" -o "$INSTALL_DIR/agent"; then
+            log_info "Agent binary downloaded successfully"
+        else
+            log_warn "Failed to download agent binary from server"
+            # Fall back to local file if download fails
+            if [[ -f "agent" ]]; then
+                log_info "Using local agent binary"
+                cp agent "$INSTALL_DIR/"
+            else
+                log_error "No agent binary available (neither download nor local file)"
+                exit 1
+            fi
+        fi
+    elif [[ -f "agent" ]]; then
+        log_info "Using local agent binary (curl not available)"
+        cp agent "$INSTALL_DIR/"
+    else
+        log_error "Cannot download agent binary (curl not available) and no local file found"
         exit 1
     fi
     
-    cp agent "$INSTALL_DIR/"
     chown "$AGENT_USER:$AGENT_GROUP" "$INSTALL_DIR/agent"
     chmod 755 "$INSTALL_DIR/agent"
     
@@ -102,28 +197,67 @@ install_binary() {
 install_config() {
     log_info "Installing configuration..."
     
-    if [[ -f "agent_config.yaml" ]]; then
-        cp agent_config.yaml "$CONFIG_DIR/config.yaml"
-        chown root:root "$CONFIG_DIR/config.yaml"
-        chmod 644 "$CONFIG_DIR/config.yaml"
-        log_info "Configuration installed to $CONFIG_DIR/config.yaml"
-    else
-        log_warn "No configuration file found. Please create $CONFIG_DIR/config.yaml manually."
-    fi
+    # Create configuration file with provided parameters
+    cat > "$CONFIG_DIR/config.yaml" << EOF
+# Monitoring Agent Configuration
+# Generated automatically by installation script
+
+# Server connection settings
+server:
+  url: "$SERVER_URL"
+  api_key: "$API_KEY"
+  timeout: 30
+  retry_attempts: 3
+  retry_delay: 5
+
+# Metrics collection settings
+metrics:
+  collection_interval: 60  # seconds
+  batch_size: 10
+  
+  # System metrics to collect
+  system:
+    cpu: true
+    memory: true
+    disk: true
+    load: true
+    uptime: true
+    network: true
+  
+  # Service monitoring
+  services:
+    enabled: true
+    check_failed: true
+
+# Logging settings
+logging:
+  level: INFO
+  file: "$LOG_DIR/agent.log"
+  max_size: 10MB
+  max_files: 5
+
+# Agent identification
+agent:
+  hostname: "$(hostname)"
+  tags: []
+EOF
     
-    # Create environment file template
+    chown root:root "$CONFIG_DIR/config.yaml"
+    chmod 644 "$CONFIG_DIR/config.yaml"
+    log_info "Configuration installed to $CONFIG_DIR/config.yaml"
+    
+    # Create environment file with API key
     cat > "$CONFIG_DIR/environment" << EOF
 # Environment variables for monitoring agent
-# Uncomment and set values as needed
-
-# MONITORING_API_KEY=your_api_key_here
-# MONITORING_CONFIG_FILE=/etc/monitoring-agent/config.yaml
-# MONITORING_LOG_LEVEL=INFO
+MONITORING_API_KEY="$API_KEY"
+MONITORING_CONFIG_FILE="$CONFIG_DIR/config.yaml"
+MONITORING_LOG_LEVEL=INFO
+MONITORING_SERVER_URL="$SERVER_URL"
 EOF
     
     chown root:root "$CONFIG_DIR/environment"
-    chmod 644 "$CONFIG_DIR/environment"
-    log_info "Environment template created at $CONFIG_DIR/environment"
+    chmod 600 "$CONFIG_DIR/environment"  # Restrict access due to API key
+    log_info "Environment file created at $CONFIG_DIR/environment"
 }
 
 # Install systemd service
@@ -141,27 +275,89 @@ install_service() {
     log_info "Systemd service installed"
 }
 
+# Test connection to server
+test_connection() {
+    log_info "Testing connection to monitoring server..."
+    
+    if command -v curl >/dev/null 2>&1; then
+        if curl -sSL -f --connect-timeout 10 "$SERVER_URL/health" >/dev/null 2>&1; then
+            log_info "✅ Successfully connected to monitoring server"
+        else
+            log_warn "⚠️  Could not connect to monitoring server at $SERVER_URL"
+            log_warn "   The agent will retry connections automatically when started"
+        fi
+    else
+        log_info "Skipping connection test (curl not available)"
+    fi
+}
+
+# Start and enable the service
+start_service() {
+    log_info "Starting monitoring agent service..."
+    
+    # Enable the service to start on boot
+    systemctl enable monitoring-agent
+    log_info "Service enabled for automatic startup"
+    
+    # Start the service
+    if systemctl start monitoring-agent; then
+        log_info "✅ Monitoring agent service started successfully"
+        
+        # Wait a moment and check status
+        sleep 2
+        if systemctl is-active --quiet monitoring-agent; then
+            log_info "✅ Service is running properly"
+        else
+            log_warn "⚠️  Service may have issues. Check logs with: journalctl -u monitoring-agent"
+        fi
+    else
+        log_error "❌ Failed to start monitoring agent service"
+        log_info "Check logs with: journalctl -u monitoring-agent"
+        exit 1
+    fi
+}
+
 # Main installation function
 main() {
-    log_info "Starting Linux Server Health Monitoring Agent installation..."
+    log_info "🚀 Starting Linux Server Health Monitoring Agent installation..."
+    echo
+    
+    # Parse command line arguments first
+    parse_arguments "$@"
+    
+    log_info "Configuration:"
+    log_info "  Server URL: $SERVER_URL"
+    log_info "  API Key: ${API_KEY:0:8}..." # Show only first 8 characters
+    echo
     
     check_root
+    test_connection
     create_user
     create_directories
     install_binary
     install_config
     install_service
+    start_service
     
-    log_info "Installation completed successfully!"
     echo
-    log_info "Next steps:"
-    echo "1. Edit configuration: $CONFIG_DIR/config.yaml"
-    echo "2. Set API key in: $CONFIG_DIR/environment"
-    echo "3. Enable service: systemctl enable monitoring-agent"
-    echo "4. Start service: systemctl start monitoring-agent"
-    echo "5. Check status: systemctl status monitoring-agent"
-    echo "6. View logs: journalctl -u monitoring-agent -f"
+    log_info "🎉 Installation completed successfully!"
+    echo
+    log_info "📋 Service Management Commands:"
+    echo "  • Check status:    systemctl status monitoring-agent"
+    echo "  • View logs:       journalctl -u monitoring-agent -f"
+    echo "  • Stop service:    systemctl stop monitoring-agent"
+    echo "  • Start service:   systemctl start monitoring-agent"
+    echo "  • Restart service: systemctl restart monitoring-agent"
+    echo
+    log_info "📁 Important Files:"
+    echo "  • Configuration:   $CONFIG_DIR/config.yaml"
+    echo "  • Environment:     $CONFIG_DIR/environment"
+    echo "  • Logs:           $LOG_DIR/agent.log"
+    echo "  • Binary:         $INSTALL_DIR/agent"
+    echo
+    log_info "✅ Your server is now being monitored!"
+    log_info "   Check your dashboard at: $SERVER_URL"
 }
 
-# Run main function
+# Run main function with all arguments
 main "$@"

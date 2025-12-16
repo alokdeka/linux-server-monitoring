@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { apiClient } from '../services/api';
 import type { Server } from '../types';
 import ConfirmationModal from '../components/common/ConfirmationModal';
+import './Dashboard.css'; // For shared page header styles
 import './ServerManagement.css';
 
 interface ApiKeyInfo {
@@ -80,7 +81,8 @@ const ServerManagement = () => {
       isValid = false;
     }
 
-    const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    const ipRegex =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     if (!formData.ipAddress.trim()) {
       errors.ipAddress = 'IP address is required';
       isValid = false;
@@ -130,7 +132,11 @@ const ServerManagement = () => {
       setFormData({ hostname: '', ipAddress: '', description: '' });
       await loadServers();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to register server. Please try again.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to register server. Please try again.'
+      );
       console.error('Error registering server:', err);
     } finally {
       setRegistering(false);
@@ -138,12 +144,15 @@ const ServerManagement = () => {
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setSuccess('Copied to clipboard!');
-      setTimeout(() => setSuccess(null), 3000);
-    }).catch(() => {
-      setError('Failed to copy to clipboard');
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setSuccess('Copied to clipboard!');
+        setTimeout(() => setSuccess(null), 3000);
+      })
+      .catch(() => {
+        setError('Failed to copy to clipboard');
+      });
   };
 
   const getInstallCommand = (apiKey: string) => {
@@ -168,12 +177,23 @@ const ServerManagement = () => {
     setSuccess(null);
 
     try {
-      const response = await apiClient.regenerateServerKey(serverId, `Regenerated key for ${hostname}`);
-      setApiKeys((prev) => prev.map((key) => key.serverId === serverId ? { ...key, apiKey: response.apiKey } : key));
+      const response = await apiClient.regenerateServerKey(
+        serverId,
+        `Regenerated key for ${hostname}`
+      );
+      setApiKeys((prev) =>
+        prev.map((key) =>
+          key.serverId === serverId ? { ...key, apiKey: response.apiKey } : key
+        )
+      );
       setSuccess(`API key regenerated successfully for "${hostname}"!`);
       await loadServers();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to regenerate API key. Please try again.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to regenerate API key. Please try again.'
+      );
       console.error('Error regenerating API key:', err);
     } finally {
       setRegenerating(null);
@@ -201,9 +221,15 @@ const ServerManagement = () => {
       await apiClient.revokeServer(serverId);
       setApiKeys((prev) => prev.filter((key) => key.serverId !== serverId));
       setServers((prev) => prev.filter((server) => server.id !== serverId));
-      setSuccess(`Server "${hostname}" has been revoked and removed successfully.`);
+      setSuccess(
+        `Server "${hostname}" has been revoked and removed successfully.`
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to revoke server. Please try again.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to revoke server. Please try again.'
+      );
       console.error('Error revoking server:', err);
     } finally {
       setRevoking(null);
@@ -212,7 +238,7 @@ const ServerManagement = () => {
 
   if (loading) {
     return (
-      <div className="page">
+      <div className="server-management-page">
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <h2>Loading Servers</h2>
@@ -222,8 +248,41 @@ const ServerManagement = () => {
     );
   }
 
+  const managementStats = {
+    totalServers: servers.length,
+    activeServers: servers.filter((server) => server.isActive).length,
+    totalApiKeys: apiKeys.length,
+  };
+
   return (
-    <div className="page">
+    <div className="server-management-page">
+      {/* Page Header */}
+      <div className="dashboard-page-header">
+        <div className="dashboard-header-content">
+          <h1>Server Management</h1>
+          <p>Register new servers and manage API keys</p>
+        </div>
+        <div className="dashboard-header-stats">
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Registered</span>
+            <span className="dashboard-stat-value">
+              {managementStats.totalServers}
+            </span>
+          </div>
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">Active</span>
+            <span className="dashboard-stat-value dashboard-online">
+              {managementStats.activeServers}
+            </span>
+          </div>
+          <div className="dashboard-stat-item">
+            <span className="dashboard-stat-label">API Keys</span>
+            <span className="dashboard-stat-value">
+              {managementStats.totalApiKeys}
+            </span>
+          </div>
+        </div>
+      </div>
 
       {error && (
         <div className="alert alert-error">
@@ -232,7 +291,9 @@ const ServerManagement = () => {
             <h3>Error</h3>
             <p>{error}</p>
           </div>
-          <button className="alert-close" onClick={() => setError(null)}>×</button>
+          <button className="alert-close" onClick={() => setError(null)}>
+            ×
+          </button>
         </div>
       )}
 
@@ -243,7 +304,9 @@ const ServerManagement = () => {
             <h3>Success</h3>
             <p>{success}</p>
           </div>
-          <button className="alert-close" onClick={() => setSuccess(null)}>×</button>
+          <button className="alert-close" onClick={() => setSuccess(null)}>
+            ×
+          </button>
         </div>
       )}
 
@@ -265,7 +328,9 @@ const ServerManagement = () => {
                 className={formErrors.hostname ? 'error' : ''}
                 disabled={registering}
               />
-              {formErrors.hostname && <span className="error-text">{formErrors.hostname}</span>}
+              {formErrors.hostname && (
+                <span className="error-text">{formErrors.hostname}</span>
+              )}
             </div>
 
             <div className="form-group">
@@ -280,10 +345,16 @@ const ServerManagement = () => {
                 className={formErrors.ipAddress ? 'error' : ''}
                 disabled={registering}
               />
-              {formErrors.ipAddress && <span className="error-text">{formErrors.ipAddress}</span>}
+              {formErrors.ipAddress && (
+                <span className="error-text">{formErrors.ipAddress}</span>
+              )}
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={registering}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={registering}
+            >
               {registering ? (
                 <>
                   <div className="loading-spinner small"></div>
@@ -300,16 +371,21 @@ const ServerManagement = () => {
           <div className="panel-header">
             <h2>Registered Servers ({apiKeys.length})</h2>
           </div>
-          
+
           {apiKeys.length === 0 ? (
             <div className="empty-state">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="3" width="20" height="4" rx="1"/>
-                <rect x="2" y="9" width="20" height="4" rx="1"/>
-                <rect x="2" y="15" width="20" height="4" rx="1"/>
-                <line x1="6" y1="5" x2="6.01" y2="5"/>
-                <line x1="6" y1="11" x2="6.01" y2="11"/>
-                <line x1="6" y1="17" x2="6.01" y2="17"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <rect x="2" y="3" width="20" height="4" rx="1" />
+                <rect x="2" y="9" width="20" height="4" rx="1" />
+                <rect x="2" y="15" width="20" height="4" rx="1" />
+                <line x1="6" y1="5" x2="6.01" y2="5" />
+                <line x1="6" y1="11" x2="6.01" y2="11" />
+                <line x1="6" y1="17" x2="6.01" y2="17" />
               </svg>
               <h3>No servers registered</h3>
               <p>Register your first server to get started with monitoring</p>
@@ -321,44 +397,78 @@ const ServerManagement = () => {
                   <div className="server-info">
                     <div className="server-header">
                       <h3>{keyInfo.hostname}</h3>
-                      <span className={`status-badge ${servers.find((s) => s.hostname === keyInfo.hostname)?.status || 'unknown'}`}>
-                        {servers.find((s) => s.hostname === keyInfo.hostname)?.status || 'unknown'}
+                      <span
+                        className={`status-badge ${servers.find((s) => s.hostname === keyInfo.hostname)?.status || 'unknown'}`}
+                      >
+                        {servers.find((s) => s.hostname === keyInfo.hostname)
+                          ?.status || 'unknown'}
                       </span>
                     </div>
                     <p className="server-ip">{keyInfo.ipAddress}</p>
                     <div className="api-key-display">
                       <code>{keyInfo.apiKey}</code>
-                      <button className="btn-icon" onClick={() => copyToClipboard(keyInfo.apiKey)} title="Copy API key">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-                          <path d="m4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                      <button
+                        className="btn-icon"
+                        onClick={() => copyToClipboard(keyInfo.apiKey)}
+                        title="Copy API key"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <rect
+                            width="14"
+                            height="14"
+                            x="8"
+                            y="8"
+                            rx="2"
+                            ry="2"
+                          />
+                          <path d="m4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                         </svg>
                       </button>
                     </div>
                     <p className="registered-date">
-                      Registered: {new Date(keyInfo.registeredAt).toLocaleDateString()}
+                      Registered:{' '}
+                      {new Date(keyInfo.registeredAt).toLocaleDateString()}
                     </p>
                   </div>
 
                   <div className="server-actions">
                     <button
                       className="btn btn-secondary"
-                      onClick={() => copyToClipboard(getInstallCommand(keyInfo.apiKey))}
+                      onClick={() =>
+                        copyToClipboard(getInstallCommand(keyInfo.apiKey))
+                      }
                       title="Copy installation command"
                     >
                       Copy Install Command
                     </button>
                     <button
                       className="btn btn-warning"
-                      onClick={() => handleRegenerateKey(keyInfo.serverId, keyInfo.hostname)}
-                      disabled={regenerating === keyInfo.serverId || revoking === keyInfo.serverId}
+                      onClick={() =>
+                        handleRegenerateKey(keyInfo.serverId, keyInfo.hostname)
+                      }
+                      disabled={
+                        regenerating === keyInfo.serverId ||
+                        revoking === keyInfo.serverId
+                      }
                     >
-                      {regenerating === keyInfo.serverId ? 'Regenerating...' : 'Regenerate'}
+                      {regenerating === keyInfo.serverId
+                        ? 'Regenerating...'
+                        : 'Regenerate'}
                     </button>
                     <button
                       className="btn btn-danger"
-                      onClick={() => handleRevokeServer(keyInfo.serverId, keyInfo.hostname)}
-                      disabled={regenerating === keyInfo.serverId || revoking === keyInfo.serverId}
+                      onClick={() =>
+                        handleRevokeServer(keyInfo.serverId, keyInfo.hostname)
+                      }
+                      disabled={
+                        regenerating === keyInfo.serverId ||
+                        revoking === keyInfo.serverId
+                      }
                     >
                       {revoking === keyInfo.serverId ? 'Revoking...' : 'Revoke'}
                     </button>

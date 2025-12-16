@@ -361,10 +361,10 @@ def get_limiter():
 def metrics_rate_limit():
     """Rate limit for metrics endpoints - more permissive for legitimate agents."""
     import os
-    # More lenient rate limiting for testing
-    if os.getenv("TESTING") == "true":
+    # More lenient rate limiting for testing and development
+    if os.getenv("TESTING") == "true" or os.getenv("LOG_LEVEL") == "info":
         return limiter.limit("1000/minute")
-    return limiter.limit("100/minute")
+    return limiter.limit("300/minute")  # Increased from 100 to 300 for dashboard usage
 
 
 def registration_rate_limit():

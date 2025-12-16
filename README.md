@@ -150,16 +150,32 @@ nano .env
 docker-compose up -d
 ```
 
-**Step 4: Open your dashboard**
+**Step 4: Create admin user**
+
+```bash
+# Create your admin user for the dashboard
+python server/cli/create_admin.py
+```
+
+Follow the prompts to set up your admin username, email, and password.
+
+**Step 5: Open your dashboard**
 
 - Go to: `http://localhost:3000` in your web browser
-- Login with: `admin` / `admin` (change this later!)
+- Login with the credentials you just created
 
-**Step 5: Add your first server**
+**Step 6: Add your first server**
 
 - Click "Server Management" in the dashboard
-- Click "Generate API Key"
-- Copy the installation command and run it on your server
+- Click "Register New Server"
+- Copy the installation command (it looks like this):
+  ```bash
+  curl -sSL https://your-server/install-agent.sh | bash -s -- \
+    --api-key="your-unique-api-key" \
+    --server-url="http://localhost:8000"
+  ```
+- Run this command **on the server you want to monitor** (as root/sudo)
+- The server will appear in your dashboard within 1-2 minutes!
 
 **That's it! 🎉** Your monitoring system is running!
 
@@ -185,6 +201,24 @@ Follow our detailed [Installation Guide](DEPLOYMENT.md#manual-installation) for 
 ![Alert Management](https://via.placeholder.com/800x500/1a202c/ffffff?text=Alert+Management+Screenshot)
 
 </details>
+
+## 🤔 What Does That Installation Command Do?
+
+The `curl` command does several things automatically:
+
+1. **📥 Downloads** a smart installation script from your monitoring server
+2. **🔐 Authenticates** using your unique API key
+3. **⚙️ Installs** the monitoring agent on your server
+4. **🚀 Starts** monitoring immediately
+
+**It's completely safe** - the script:
+
+- ✅ Creates a dedicated user (not root) to run the agent
+- ✅ Sets up proper file permissions and security
+- ✅ Configures automatic startup on server reboot
+- ✅ Tests the connection before finishing
+
+**Think of it like installing a security camera** - one command and your server is being watched!
 
 ## 🏗 How It Works (Simple Explanation)
 
@@ -317,6 +351,52 @@ For detailed manual installation instructions, see:
 - **[Agent Installation](DEPLOYMENT.md#agent-deployment)**
 - **[Dashboard Setup](dashboard/DEPLOYMENT.md)**
 
+### Admin User Management
+
+#### Creating the First Admin User
+
+After setting up the server, you need to create an admin user to access the dashboard:
+
+```bash
+# Navigate to the project directory
+cd linux-server-monitoring
+
+# Run the admin creation script
+python server/cli/create_admin.py
+```
+
+The script will prompt you for:
+
+- **Username**: Your admin username
+- **Email**: Your email address (optional)
+- **Full Name**: Your full name (optional)
+- **Password**: Secure password (minimum 8 characters)
+
+**Example:**
+
+```bash
+$ python server/cli/create_admin.py
+Creating admin user for the dashboard...
+==================================================
+Enter admin username: admin
+Enter admin email (optional): admin@example.com
+Enter full name (optional): System Administrator
+Enter admin password: [hidden]
+Confirm admin password: [hidden]
+
+Admin user 'admin' created successfully!
+User ID: 1
+Email: admin@example.com
+Full Name: System Administrator
+```
+
+#### Important Notes
+
+- **First Time Setup**: You must create an admin user before you can access the dashboard
+- **Secure Passwords**: Use a strong password with at least 8 characters
+- **Multiple Admins**: You can create multiple admin users by running the script again
+- **Password Requirements**: Passwords must be at least 8 characters long
+
 ## 🤝 Contributing
 
 We welcome contributions! Please see our documentation:
@@ -364,9 +444,11 @@ _Live demo coming soon! For now, follow the Quick Start guide to set up your own
 **Common Issues:**
 
 - **Can't access dashboard?** → Check if Docker containers are running: `docker-compose ps`
+- **No admin user exists?** → Run `python server/cli/create_admin.py` to create one
+- **Forgot admin password?** → Create a new admin user with the same script
 - **Agent won't connect?** → Verify API key and server URL in agent config
 - **High resource usage?** → Check monitoring interval settings in configuration
-- **Authentication issues?** → Reset admin password in environment variables
+- **Authentication issues?** → Ensure admin user exists and credentials are correct
 
 **Need immediate help?** Contact [@alokdeka](https://github.com/alokdeka) on GitHub with:
 
