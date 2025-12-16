@@ -1,6 +1,6 @@
 [Unit]
 Description=Linux Server Health Monitoring Agent
-Documentation=https://github.com/your-org/linux-server-monitoring
+Documentation=https://github.com/alokdeka/linux-server-monitoring
 After=network-online.target
 Wants=network-online.target
 StartLimitIntervalSec=0

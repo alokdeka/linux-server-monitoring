@@ -65,7 +65,7 @@ This is the web dashboard where you'll spend most of your time. It shows you eve
 1. **Get the code:**
 
    ```bash
-   git clone https://github.com/your-username/linux-server-monitoring.git
+   git clone git@github.com:alokdeka/linux-server-monitoring.git
    cd linux-server-monitoring/dashboard
    ```
 
@@ -578,7 +578,7 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 
 For support and questions:
 
-- **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-repo/discussions)
+- **Issues**: [GitHub Issues](https://github.com/alokdeka/linux-server-monitoring/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/alokdeka/linux-server-monitoring/discussions)
 - **Documentation**: Check the docs folder for detailed guides
 - **Email**: support@yourproject.com

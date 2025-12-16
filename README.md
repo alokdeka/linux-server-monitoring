@@ -1,8 +1,30 @@
 # 🖥️ Linux Server Health Monitoring System
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![React](https://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
+
 **Monitor all your Linux servers from one beautiful dashboard!**
 
 A complete, easy-to-use monitoring solution that watches your servers 24/7 and alerts you when something goes wrong. Perfect for beginners and professionals alike.
+
+![Dashboard Preview](https://via.placeholder.com/800x400/1a202c/ffffff?text=Dashboard+Preview+Coming+Soon)
+
+> 🚀 **Quick Start**: Get monitoring running in 5 minutes with Docker!
+
+## 📋 Table of Contents
+
+- [What Does This Do?](#-what-does-this-do)
+- [Key Features](#-key-features)
+- [Quick Start](#-quick-start-5-minutes-setup)
+- [How It Works](#-how-it-works-simple-explanation)
+- [Screenshots](#-screenshots)
+- [System Requirements](#-system-requirements)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
+- [Support](#-support)
+- [Roadmap](#-roadmap)
 
 ## 🎯 What Does This Do?
 
@@ -14,6 +36,19 @@ Imagine you have multiple Linux servers (web servers, databases, etc.) and you w
 - ✅ **View everything in one place** - Beautiful web dashboard accessible from anywhere
 
 **This system does exactly that!** It's like having a personal assistant watching all your servers.
+
+## ✨ Key Features
+
+| Feature                     | Description                                            |
+| --------------------------- | ------------------------------------------------------ |
+| 🔄 **Real-time Monitoring** | Live metrics updated every 30 seconds                  |
+| 📊 **Beautiful Dashboard**  | Modern React-based web interface                       |
+| 🚨 **Smart Alerts**         | Configurable thresholds with Slack/email notifications |
+| 🐳 **Easy Deployment**      | One-command Docker setup                               |
+| 🔒 **Secure**               | JWT authentication with role-based access              |
+| 📱 **Mobile Friendly**      | Responsive design works on all devices                 |
+| 🔧 **Lightweight Agents**   | Minimal resource usage (50MB RAM)                      |
+| 📈 **Historical Data**      | Track trends and performance over time                 |
 
 ## Project Structure
 
@@ -97,7 +132,7 @@ Property-based tests are tagged with comments referencing specific correctness p
 **Step 1: Get the code**
 
 ```bash
-git clone https://github.com/your-username/linux-server-monitoring.git
+git clone git@github.com:alokdeka/linux-server-monitoring.git
 cd linux-server-monitoring
 ```
 
@@ -131,6 +166,25 @@ docker-compose up -d
 ### Option 2: Manual Setup (If you prefer more control)
 
 Follow our detailed [Installation Guide](DEPLOYMENT.md#manual-installation) for step-by-step instructions.
+
+## 📸 Screenshots
+
+<details>
+<summary>Click to see dashboard screenshots</summary>
+
+### Main Dashboard
+
+![Main Dashboard](https://via.placeholder.com/800x500/1a202c/ffffff?text=Main+Dashboard+Screenshot)
+
+### Server Details
+
+![Server Details](https://via.placeholder.com/800x500/1a202c/ffffff?text=Server+Details+Screenshot)
+
+### Alert Management
+
+![Alert Management](https://via.placeholder.com/800x500/1a202c/ffffff?text=Alert+Management+Screenshot)
+
+</details>
 
 ## 🏗 How It Works (Simple Explanation)
 
@@ -227,7 +281,7 @@ Your Servers → Agents → Central Server → Dashboard → You
 1. **Clone the repository**:
 
    ```bash
-   git clone <repository-url>
+   git clone git@github.com:alokdeka/linux-server-monitoring.git
    cd linux-server-monitoring
    ```
 
@@ -283,22 +337,42 @@ We welcome contributions! Please see our documentation:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 📊 Live Demo
+
+_Live demo coming soon! For now, follow the Quick Start guide to set up your own instance in 5 minutes._
+
 ## 🆘 Support
 
 ### Getting Help
 
-- **Documentation**: Check the comprehensive guides in the `/docs` folder
-- **Issues**: [GitHub Issues](https://github.com/your-repo/issues) for bug reports
-- **Discussions**: [GitHub Discussions](https://github.com/your-repo/discussions) for questions
-- **Community**: Join our community for tips and best practices
+- 📖 **Documentation** - Check the comprehensive guides in this repository
+- � **Troubleoshooting** - See [User Guide](dashboard/USER_GUIDE.md#troubleshooting) for common solutions
+- � **Contact** - Reach out to [@alokdeka](https://github.com/alokdeka) directly on GitHub
+- � **Code Issoues** - Fork the repo and submit a pull request with fixes
 
-### Professional Support
+> **📝 Note**: Issues and Discussions will be enabled soon for better community support!
 
-For enterprise deployments and professional support:
+### Community
 
-- **Email**: support@yourproject.com
-- **Documentation**: Enterprise deployment guides available
-- **Training**: Custom training and onboarding available
+- ⭐ **Star this repo** if you find it useful!
+- 🍴 **Fork and contribute** - We welcome pull requests
+- 📢 **Share your setup** - Show us how you're using it
+- 💡 **Suggest features** - Contact the maintainer with ideas
+
+### Quick Help
+
+**Common Issues:**
+
+- **Can't access dashboard?** → Check if Docker containers are running: `docker-compose ps`
+- **Agent won't connect?** → Verify API key and server URL in agent config
+- **High resource usage?** → Check monitoring interval settings in configuration
+- **Authentication issues?** → Reset admin password in environment variables
+
+**Need immediate help?** Contact [@alokdeka](https://github.com/alokdeka) on GitHub with:
+
+- Your setup details (Docker/manual installation)
+- Error messages or logs
+- What you were trying to do when the issue occurred
 
 ## 🎯 Roadmap
 
@@ -326,6 +400,24 @@ For enterprise deployments and professional support:
 - Third-party integrations
 - Performance optimization tools
 
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=alokdeka/linux-server-monitoring&type=Date)](https://star-history.com/#alokdeka/linux-server-monitoring&Date)
+
+## 🙏 Acknowledgments
+
+- Built with ❤️ using [FastAPI](https://fastapi.tiangolo.com/), [React](https://reactjs.org/), and [PostgreSQL](https://www.postgresql.org/)
+- Inspired by modern monitoring solutions like Grafana and Prometheus
+- Thanks to all contributors and the open-source community
+
 ---
 
-**Ready to get started?** Check out our [Quick Start Guide](dashboard/README.md#quick-start) or dive into the [User Guide](dashboard/USER_GUIDE.md) for detailed instructions.
+<div align="center">
+
+**Ready to get started?**
+
+[![Get Started](https://img.shields.io/badge/Get%20Started-blue?style=for-the-badge&logo=rocket)](DEPLOYMENT.md) [![View Docs](https://img.shields.io/badge/View%20Docs-green?style=for-the-badge&logo=book)](dashboard/README.md)
+
+**Made with ❤️ by [Alok Deka](https://github.com/alokdeka)**
+
+</div>

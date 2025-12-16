@@ -73,7 +73,7 @@ docker --version
 
 ```bash
 # Download the code
-git clone https://github.com/your-username/linux-server-monitoring.git
+git clone git@github.com:alokdeka/linux-server-monitoring.git
 cd linux-server-monitoring
 
 # If you don't have git, download the ZIP file from GitHub and extract it

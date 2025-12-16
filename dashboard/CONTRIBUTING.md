@@ -29,7 +29,7 @@ Before contributing, ensure you have:
 1. **Fork and clone the repository:**
 
    ```bash
-   git clone https://github.com/your-username/linux-server-monitoring.git
+   git clone git@github.com:alokdeka/linux-server-monitoring.git
    cd linux-server-monitoring/dashboard
    ```
 

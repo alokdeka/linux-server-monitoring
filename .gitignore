@@ -50,6 +50,9 @@ coverage.xml
 *.swo
 *~
 
+# Kiro IDE
+.kiro/
+
 # OS
 .DS_Store
 .DS_Store?
