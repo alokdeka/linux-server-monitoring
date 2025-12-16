@@ -47,6 +47,7 @@ import {
   ToastProvider,
   LoadingSpinner,
 } from './components/common';
+import ThemeSync from './components/common/ThemeSync';
 
 import './App.css';
 import { ThemeProvider } from './styles/ThemeProvider';
@@ -115,6 +116,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark">
+      <ThemeSync />
       <ErrorBoundary>
         <ToastProvider maxToasts={3} position="top-right">
           <Router>

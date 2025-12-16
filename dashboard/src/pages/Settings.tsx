@@ -8,6 +8,7 @@ import {
   clearSettingsError,
 } from '../store/slices/appSlice';
 import type { DashboardSettings } from '../types';
+import { useTheme } from '../styles/ThemeProvider';
 import './Settings.css';
 
 interface ValidationErrors {
@@ -23,6 +24,7 @@ const Settings = () => {
   const { settings, settingsLoading, settingsError } = useSelector(
     (state: RootState) => state.app
   );
+  const { themeType, setTheme } = useTheme();
 
   const [activeTab, setActiveTab] = useState<
     'alerts' | 'notifications' | 'display'
@@ -47,8 +49,13 @@ const Settings = () => {
     if (settings) {
       setLocalSettings(settings);
       setHasUnsavedChanges(false);
+
+      // Sync theme with UI theme system
+      if (settings.display.theme !== themeType) {
+        setTheme(settings.display.theme);
+      }
     }
-  }, [settings]);
+  }, [settings, themeType, setTheme]);
 
   // Clear errors when component unmounts
   useEffect(() => {
@@ -428,14 +435,28 @@ const Settings = () => {
                 <label>Theme</label>
                 <select
                   value={localSettings.display.theme}
-                  onChange={(e) =>
-                    updateLocalSettings({
+                  onChange={async (e) => {
+                    const newTheme = e.target.value as 'light' | 'dark';
+                    const newSettings = {
+                      ...localSettings,
                       display: {
                         ...localSettings.display,
-                        theme: e.target.value as 'light' | 'dark',
+                        theme: newTheme,
                       },
-                    })
-                  }
+                    };
+
+                    setLocalSettings(newSettings);
+
+                    // Immediately update UI theme for instant feedback
+                    setTheme(newTheme);
+
+                    // Auto-save display preferences
+                    try {
+                      await dispatch(saveSettings(newSettings)).unwrap();
+                    } catch (error) {
+                      // Error is handled by Redux state
+                    }
+                  }}
                 >
                   <option value="light">Light</option>
                   <option value="dark">Dark</option>
@@ -446,14 +467,24 @@ const Settings = () => {
                   <input
                     type="checkbox"
                     checked={localSettings.display.compactMode}
-                    onChange={(e) =>
-                      updateLocalSettings({
+                    onChange={async (e) => {
+                      const newSettings = {
+                        ...localSettings,
                         display: {
                           ...localSettings.display,
                           compactMode: e.target.checked,
                         },
-                      })
-                    }
+                      };
+
+                      setLocalSettings(newSettings);
+
+                      // Auto-save display preferences
+                      try {
+                        await dispatch(saveSettings(newSettings)).unwrap();
+                      } catch (error) {
+                        // Error is handled by Redux state
+                      }
+                    }}
                   />
                   Compact View Mode
                 </label>
@@ -463,14 +494,24 @@ const Settings = () => {
                   <input
                     type="checkbox"
                     checked={localSettings.display.chartsEnabled}
-                    onChange={(e) =>
-                      updateLocalSettings({
+                    onChange={async (e) => {
+                      const newSettings = {
+                        ...localSettings,
                         display: {
                           ...localSettings.display,
                           chartsEnabled: e.target.checked,
                         },
-                      })
-                    }
+                      };
+
+                      setLocalSettings(newSettings);
+
+                      // Auto-save display preferences
+                      try {
+                        await dispatch(saveSettings(newSettings)).unwrap();
+                      } catch (error) {
+                        // Error is handled by Redux state
+                      }
+                    }}
                   />
                   Enable Charts
                 </label>
