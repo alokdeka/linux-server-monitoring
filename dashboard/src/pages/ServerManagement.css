@@ -1,0 +1,214 @@
+.server-management-page {
+  padding: 0;
+  animation: fadeIn 0.3s ease-out;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.page-header h1 {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.page-header p {
+  color: #94a3b8;
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+.management-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  width: 100%;
+}
+
+.registration-section,
+.api-keys-section {
+  background: #1a202c;
+  border: 1px solid #2d3748;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.registration-section h2,
+.api-keys-section h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.registration-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.form-group input {
+  background: #0f1419;
+  border: 1px solid #2d3748;
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: #ffffff;
+  font-size: 0.875rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-group input::placeholder {
+  color: #64748b;
+}
+
+.register-btn {
+  background: #4299e1;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.register-btn:hover {
+  background: #3182ce;
+}
+
+.api-key-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.api-key-item {
+  background: #0f1419;
+  border: 1px solid #2d3748;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.key-info h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.key-info p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.key-info code {
+  background: #2d3748;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #4299e1;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.key-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.regenerate-btn,
+.revoke-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.regenerate-btn {
+  background: #f59e0b;
+  color: white;
+}
+
+.regenerate-btn:hover {
+  background: #d97706;
+}
+
+.revoke-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.revoke-btn:hover {
+  background: #dc2626;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 1200px) {
+  .management-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .server-management-page {
+    padding: 1rem;
+  }
+
+  .registration-section,
+  .api-keys-section {
+    padding: 1rem;
+  }
+
+  .api-key-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .key-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

@@ -9,7 +9,6 @@ import type { RootState } from './store';
 import { toggleSidebar } from './store/slices/appSlice';
 
 // Layout components
-import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
 import MainContent from './components/layout/MainContent';
 import Footer from './components/layout/Footer';
@@ -59,13 +58,16 @@ function App() {
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <div className="app-layout">
-                  <Header user={user} onLogout={handleLogout} />
                   <div className="app-body">
                     <Sidebar
                       isOpen={sidebarOpen}
                       onToggle={handleSidebarToggle}
                     />
-                    <MainContent sidebarOpen={sidebarOpen} />
+                    <MainContent
+                      sidebarOpen={sidebarOpen}
+                      user={user}
+                      onLogout={handleLogout}
+                    />
                   </div>
                   <Footer
                     connectionStatus="connected"

@@ -2,11 +2,12 @@
   padding: 0;
   animation: fadeIn 0.3s ease-out;
   width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
 .dashboard-header {
   margin-bottom: 2rem;
-  padding: 0;
   width: 100%;
 }
 
@@ -259,6 +260,10 @@
 }
 
 @media (max-width: 768px) {
+  .dashboard-page {
+    padding: 1rem;
+  }
+
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
