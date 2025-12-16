@@ -406,7 +406,7 @@ const Settings = () => {
                     placeholder="https://hooks.slack.com/..."
                     value={newWebhookUrl}
                     onChange={(e) => setNewWebhookUrl(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addWebhookUrl()}
+                    onKeyDown={(e) => e.key === 'Enter' && addWebhookUrl()}
                   />
                   <button type="button" onClick={addWebhookUrl}>
                     Add Webhook

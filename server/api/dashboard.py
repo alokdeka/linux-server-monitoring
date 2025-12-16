@@ -101,6 +101,7 @@ class UserRegistrationRequest(BaseModel):
 
 class SettingsUpdateRequest(BaseModel):
     """Request model for settings updates."""
+    refresh_interval: Optional[int] = None
     display: Optional[Dict[str, Any]] = None
     alert_thresholds: Optional[Dict[str, float]] = None
     notifications: Optional[Dict[str, Any]] = None
@@ -400,12 +401,32 @@ async def get_user_settings(current_user_id: int = Depends(get_current_user),
         settings = settings_service.get_user_settings(current_user_id)
         
         if not settings:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Settings not found"
-            )
+            # Create default settings for new user
+            success = settings_service.create_default_settings(current_user_id)
+            if success:
+                settings = settings_service.get_user_settings(current_user_id)
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to create default settings"
+                )
         
-        return settings
+        # Return in the format expected by frontend
+        return {
+            "settings": {
+                "refresh_interval": settings["display"]["refresh_interval"] * 1000,  # Convert to milliseconds
+                "alert_thresholds": settings["alert_thresholds"],
+                "notifications": {
+                    "enabled": settings["notifications"]["enabled"],
+                    "webhook_urls": settings["notifications"]["webhook_urls"]
+                },
+                "display": {
+                    "theme": settings["display"]["theme"],
+                    "compact_mode": settings["display"]["compact_mode"],
+                    "charts_enabled": settings["display"]["charts_enabled"]
+                }
+            }
+        }
         
     except HTTPException:
         raise
@@ -435,10 +456,22 @@ async def update_user_settings(settings_data: SettingsUpdateRequest,
     try:
         settings_service = DashboardSettingsService(db_session)
         
-        success = settings_service.update_user_settings(
-            current_user_id, 
-            settings_data.dict(exclude_unset=True)
-        )
+        # Ensure user has settings record
+        existing_settings = settings_service.get_user_settings(current_user_id)
+        if not existing_settings:
+            settings_service.create_default_settings(current_user_id)
+        
+        # Convert frontend format to backend format
+        backend_data = settings_data.dict(exclude_unset=True)
+        
+        # Handle refresh_interval conversion (frontend sends milliseconds, backend stores seconds)
+        if "refresh_interval" in backend_data:
+            if "display" not in backend_data:
+                backend_data["display"] = {}
+            backend_data["display"]["refresh_interval"] = backend_data["refresh_interval"] // 1000
+            del backend_data["refresh_interval"]
+        
+        success = settings_service.update_user_settings(current_user_id, backend_data)
         
         if not success:
             raise HTTPException(

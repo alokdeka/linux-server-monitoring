@@ -627,7 +627,7 @@ class ApiClientImpl implements ApiClient {
         alertThresholds: response.settings.alert_thresholds,
         notifications: {
           enabled: response.settings.notifications.enabled,
-          webhookUrls: response.settings.notifications.webhook_urls,
+          webhookUrls: response.settings.notifications.webhook_urls || [],
         },
         display: {
           theme: response.settings.display.theme as 'light' | 'dark',

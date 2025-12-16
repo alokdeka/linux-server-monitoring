@@ -58,7 +58,7 @@ class DashboardSettingsService:
             },
             "notifications": {
                 "enabled": settings.notifications_enabled,
-                "webhook_urls": settings.webhook_urls,
+                "webhook_urls": settings.webhook_urls or [],  # Ensure it's always a list
                 "email_notifications": settings.email_notifications
             }
         }
@@ -141,7 +141,7 @@ class DashboardSettingsService:
             
             # Reset to default values
             settings.theme = 'light'
-            settings.refresh_interval = 30
+            settings.refresh_interval = 30  # 30 seconds
             settings.compact_mode = False
             settings.charts_enabled = True
             settings.cpu_threshold = 80.0
@@ -293,7 +293,7 @@ class DashboardSettingsService:
             settings = DashboardSettings(
                 user_id=user_id,
                 theme='light',
-                refresh_interval=30,
+                refresh_interval=30,  # 30 seconds
                 compact_mode=False,
                 charts_enabled=True,
                 cpu_threshold=80.0,
