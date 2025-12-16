@@ -79,6 +79,8 @@ Imagine you have multiple Linux servers (web servers, databases, etc.) and you w
 
 **For developers who want to run the system locally for development and testing.**
 
+> 🚀 **Quick Setup**: Use our automated setup script: `./setup-dev.sh` (Linux/macOS only)
+
 ### Prerequisites
 
 - **Python 3.8+** with pip
@@ -86,7 +88,35 @@ Imagine you have multiple Linux servers (web servers, databases, etc.) and you w
 - **PostgreSQL 12+** (local installation)
 - **Git** for version control
 
-### Step 1: Clone and Setup Repository
+> **📝 Note**: The automated setup script (`setup-dev.sh`) supports Linux and macOS. Windows users should follow the manual setup steps below.
+
+### Option A: Automated Setup (Recommended)
+
+```bash
+# Clone the repository
+git clone git@github.com:alokdeka/linux-server-monitoring.git
+cd linux-server-monitoring
+
+# Run the automated setup script (Linux/macOS only)
+./setup-dev.sh
+```
+
+The script will automatically:
+
+- ✅ Check prerequisites and install PostgreSQL if needed
+- ✅ Create Python virtual environment and install dependencies
+- ✅ Setup PostgreSQL database and user
+- ✅ Run database migrations
+- ✅ Setup dashboard with Node.js dependencies
+- ✅ Create development scripts
+- ✅ Create admin user
+- ✅ Verify the complete setup
+
+**After the script completes, jump to [Step 8: Start Development Environment](#step-8-start-development-environment)**
+
+### Option B: Manual Setup
+
+#### Step 1: Clone and Setup Repository
 
 ```bash
 # Clone the repository
@@ -101,7 +131,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Step 2: Database Setup
+#### Step 2: Database Setup
 
 ```bash
 # Install PostgreSQL (Ubuntu/Debian)
@@ -122,7 +152,7 @@ ALTER USER monitoring_user CREATEDB;
 EOF
 ```
 
-### Step 3: Environment Configuration
+#### Step 3: Environment Configuration
 
 ```bash
 # Copy environment template
@@ -157,7 +187,7 @@ RATE_LIMIT_REQUESTS=1000
 RATE_LIMIT_WINDOW=60
 ```
 
-### Step 4: Database Migration
+#### Step 4: Database Migration
 
 ```bash
 # Run database migrations
@@ -174,7 +204,7 @@ with get_db_session() as db:
 "
 ```
 
-### Step 5: Start the Backend Server
+#### Step 5: Start the Backend Server
 
 ```bash
 # Activate virtual environment
@@ -192,7 +222,7 @@ uvicorn server.main:app --reload --host 127.0.0.1 --port 8000
 
 The server will be available at: `http://localhost:8000`
 
-### Step 6: Setup and Start the Dashboard
+#### Step 6: Setup and Start the Dashboard
 
 ```bash
 # Navigate to dashboard directory
@@ -219,14 +249,14 @@ npm run dev
 
 The dashboard will be available at: `http://localhost:3000`
 
-### Step 7: Create Admin User
+#### Step 7: Create Admin User
 
 ```bash
 # In the main project directory
 python server/cli/create_admin.py
 ```
 
-### Step 8: Verify Local Setup
+#### Step 8: Verify Local Setup
 
 ```bash
 # Test API health
@@ -235,6 +265,28 @@ curl http://localhost:8000/api/v1/health
 # Test dashboard
 open http://localhost:3000  # macOS
 # Or visit http://localhost:3000 in your browser
+```
+
+### Step 8: Start Development Environment
+
+If you used the automated setup script, you can start the development environment with:
+
+```bash
+# Start both backend and frontend servers
+./scripts/dev-start.sh
+```
+
+This will start:
+
+- **Backend server** at `http://localhost:8000` with auto-reload
+- **Frontend server** at `http://localhost:3000` with hot reload
+- **API documentation** at `http://localhost:8000/docs`
+
+**Other useful development scripts:**
+
+```bash
+./scripts/test-all.sh     # Run all tests (backend + frontend)
+./scripts/dev-reset.sh    # Reset database to clean state
 ```
 
 ### Development Workflow
