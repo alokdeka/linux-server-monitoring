@@ -1,5 +1,5 @@
-# Multi-stage build for React dashboard
-FROM node:20-alpine AS builder
+# Simple Dockerfile for dashboard (development mode)
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -7,34 +7,25 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (including dev dependencies for build)
+# Install dependencies
 RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build:docker
+# Expose port 3000
+EXPOSE 3000
 
-# Production stage with nginx
-FROM nginx:alpine
-
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Copy built application from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy environment variable script
-COPY env.sh /docker-entrypoint.d/env.sh
-RUN chmod +x /docker-entrypoint.d/env.sh
-
-# Expose port 80
-EXPOSE 80
+# Set environment variables for Docker
+ENV VITE_API_BASE_URL=http://localhost:8000
+ENV VITE_WS_BASE_URL=ws://localhost:8000
+ENV VITE_APP_TITLE="Server Monitoring Dashboard"
+ENV VITE_REFRESH_INTERVAL=30000
+ENV VITE_ENABLE_DEBUG=false
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+    CMD curl -f http://localhost:3000/ || exit 1
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

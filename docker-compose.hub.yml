@@ -64,14 +64,14 @@ services:
       VITE_REFRESH_INTERVAL: ${DASHBOARD_REFRESH_INTERVAL:-30000}
       VITE_ENABLE_DEBUG: ${DASHBOARD_DEBUG:-false}
     ports:
-      - "${DASHBOARD_PORT:-3000}:80"
+      - "${DASHBOARD_PORT:-3000}:3000"
     depends_on:
       - server
     networks:
       - monitoring_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
