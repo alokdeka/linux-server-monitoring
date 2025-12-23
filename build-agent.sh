@@ -63,7 +63,6 @@ pyinstaller \
     --clean \
     --noconfirm \
     --console \
-    --add-data "agent/requirements.txt:." \
     agent/main.py
 
 # Check if build was successful
