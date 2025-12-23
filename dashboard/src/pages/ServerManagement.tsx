@@ -234,9 +234,27 @@ const ServerManagement = () => {
   };
 
   const getInstallCommand = (apiKey: string) => {
-    // Use the actual server URL from environment or default to localhost
-    const serverUrl = window.location.origin.replace(':3000', ':8000'); // Replace frontend port with backend port
+    // Get the network IP from environment variable or use current host
+    const networkIP = import.meta.env.VITE_NETWORK_IP;
+    const currentHost = window.location.hostname;
+
+    // Use network IP if available and we're on localhost, otherwise use current host
+    let serverHost = currentHost;
+    if (
+      networkIP &&
+      (currentHost === 'localhost' || currentHost === '127.0.0.1')
+    ) {
+      serverHost = networkIP;
+    }
+
+    const serverUrl = `http://${serverHost}:8000`;
     return `curl -sSL ${serverUrl}/install-agent.sh | bash -s -- --api-key="${apiKey}" --server-url="${serverUrl}"`;
+  };
+
+  const getRemoteInstallCommand = (apiKey: string) => {
+    // For remote servers, use GitHub for the install script
+    // Replace YOUR_PUBLIC_IP with your actual public IP (e.g., 49.37.103.229) or ngrok URL
+    return `curl -sSL https://raw.githubusercontent.com/alokdeka/linux-server-monitoring/master/install-agent.sh | bash -s -- --api-key="${apiKey}" --server-url="http://YOUR_PUBLIC_IP:8000"`;
   };
 
   const handleRegenerateKey = (serverId: string, hostname: string) => {
@@ -430,6 +448,10 @@ const ServerManagement = () => {
               {formErrors.ipAddress && (
                 <span className="error-text">{formErrors.ipAddress}</span>
               )}
+              <small className="form-help">
+                💡 This is the IP address of the server you want to monitor
+                (where you'll install the agent)
+              </small>
             </div>
 
             <button
@@ -537,7 +559,7 @@ const ServerManagement = () => {
                       onClick={() =>
                         copyToClipboard(getInstallCommand(keyInfo.apiKey))
                       }
-                      title="Copy installation command"
+                      title="Copy installation command for local network"
                       disabled={
                         !keyInfo.isNewlyGenerated &&
                         keyInfo.apiKey.includes('••••')
@@ -546,7 +568,23 @@ const ServerManagement = () => {
                       {!keyInfo.isNewlyGenerated &&
                       keyInfo.apiKey.includes('••••')
                         ? 'Regenerate Key First'
-                        : 'Copy Install Command'}
+                        : 'Copy Local Install'}
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() =>
+                        copyToClipboard(getRemoteInstallCommand(keyInfo.apiKey))
+                      }
+                      title="Copy installation command for remote servers"
+                      disabled={
+                        !keyInfo.isNewlyGenerated &&
+                        keyInfo.apiKey.includes('••••')
+                      }
+                    >
+                      {!keyInfo.isNewlyGenerated &&
+                      keyInfo.apiKey.includes('••••')
+                        ? 'Regenerate Key First'
+                        : 'Copy Remote Install'}
                     </button>
                     <button
                       className="btn btn-warning"

@@ -42,13 +42,25 @@ log_error() {
 parse_arguments() {
     while [[ $# -gt 0 ]]; do
         case $1 in
+            --api-key=*)
+                API_KEY="${1#*=}"
+                shift
+                ;;
             --api-key)
                 API_KEY="$2"
                 shift 2
                 ;;
+            --server-url=*)
+                SERVER_URL="${1#*=}"
+                shift
+                ;;
             --server-url)
                 SERVER_URL="$2"
                 shift 2
+                ;;
+            --agent-url=*)
+                AGENT_DOWNLOAD_URL="${1#*=}"
+                shift
                 ;;
             --agent-url)
                 AGENT_DOWNLOAD_URL="$2"
