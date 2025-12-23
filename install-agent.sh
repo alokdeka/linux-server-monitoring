@@ -176,7 +176,7 @@ create_directories() {
     chmod 755 "$CONFIG_DIR"
     chmod 755 "$LOG_DIR"
     chmod 755 "$DATA_DIR"
-    chmod 644 "$CONFIG_DIR"/*
+    # Note: Config files will be chmod'd when created in install_config()
 }
 
 # Download and install agent binary
