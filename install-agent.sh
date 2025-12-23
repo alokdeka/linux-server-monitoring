@@ -40,22 +40,28 @@ log_error() {
 
 # Parse command line arguments
 parse_arguments() {
+    echo "DEBUG: Received $# arguments: $@" >&2
     while [[ $# -gt 0 ]]; do
+        echo "DEBUG: Processing argument: '$1'" >&2
         case $1 in
             --api-key=*)
                 API_KEY="${1#*=}"
+                echo "DEBUG: Set API_KEY to: '$API_KEY'" >&2
                 shift
                 ;;
             --api-key)
                 API_KEY="$2"
+                echo "DEBUG: Set API_KEY to: '$API_KEY'" >&2
                 shift 2
                 ;;
             --server-url=*)
                 SERVER_URL="${1#*=}"
+                echo "DEBUG: Set SERVER_URL to: '$SERVER_URL'" >&2
                 shift
                 ;;
             --server-url)
                 SERVER_URL="$2"
+                echo "DEBUG: Set SERVER_URL to: '$SERVER_URL'" >&2
                 shift 2
                 ;;
             --agent-url=*)
