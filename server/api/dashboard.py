@@ -733,7 +733,7 @@ async def get_alerts(request: Request,
 
 class ServerRegistrationRequest(BaseModel):
     """Request model for server registration."""
-    server_id: str = Field(..., min_length=1, max_length=255)
+    server_id: Optional[str] = Field(None, min_length=1, max_length=255)
     hostname: Optional[str] = Field(None, max_length=255)
     ip_address: Optional[str] = Field(None, max_length=45)
     description: Optional[str] = Field(None, max_length=500)
@@ -741,9 +741,9 @@ class ServerRegistrationRequest(BaseModel):
     @field_validator('server_id')
     @classmethod
     def validate_server_id(cls, v):
-        if not v or len(v.strip()) == 0:
+        if v and len(v.strip()) == 0:
             raise ValueError('Server ID cannot be empty')
-        return v.strip()
+        return v.strip() if v else None
 
 
 class ApiKeyRegenerationRequest(BaseModel):
@@ -820,6 +820,15 @@ async def register_server_via_dashboard(request: Request,
     """
     try:
         from server.auth.service import AuthenticationService
+        import uuid
+        
+        # Auto-generate server_id if not provided
+        if not registration_data.server_id:
+            # Generate a unique server ID based on hostname and timestamp
+            hostname_part = registration_data.hostname or "server"
+            # Clean hostname for use in ID
+            clean_hostname = "".join(c for c in hostname_part if c.isalnum() or c in "-_").lower()
+            registration_data.server_id = f"{clean_hostname}-{uuid.uuid4().hex[:8]}"
         
         # Check if server already exists
         existing_server = ServerOperations.get_server(db_session, registration_data.server_id)

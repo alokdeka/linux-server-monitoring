@@ -11,6 +11,7 @@ interface ApiKeyInfo {
   ipAddress: string;
   apiKey: string;
   registeredAt: string;
+  isNewlyGenerated?: boolean; // Track if this is a newly generated key
 }
 
 const ServerManagement = () => {
@@ -44,23 +45,57 @@ const ServerManagement = () => {
   });
 
   useEffect(() => {
-    loadServers();
+    loadServers(); // Initial load - no need to preserve keys
   }, []);
 
-  const loadServers = async () => {
+  const loadServers = async (preserveNewKeys = false) => {
     try {
       setLoading(true);
       const serverData = await apiClient.getServers();
       setServers(serverData);
 
-      const keyData: ApiKeyInfo[] = serverData.map((server) => ({
-        serverId: server.id,
-        hostname: server.hostname,
-        ipAddress: server.ipAddress,
-        apiKey: '••••••••••••••••••••',
-        registeredAt: server.registeredAt,
-      }));
-      setApiKeys(keyData);
+      if (preserveNewKeys) {
+        // When preserving new keys, only update servers that don't have newly generated keys
+        setApiKeys((prevKeys) => {
+          const newKeyData = serverData.map((server) => ({
+            serverId: server.id,
+            hostname: server.hostname,
+            ipAddress: server.ipAddress,
+            apiKey: '••••••••••••••••••••', // Mask existing keys for security
+            registeredAt: server.registeredAt,
+            isNewlyGenerated: false, // These are existing keys, so mask them
+          }));
+
+          // Preserve any newly generated keys
+          const preservedKeys = prevKeys.filter((key) => key.isNewlyGenerated);
+
+          // Merge: keep newly generated keys, add/update others with masked keys
+          const mergedKeys = [...preservedKeys];
+          newKeyData.forEach((newKey) => {
+            const existingNewKey = preservedKeys.find(
+              (pk) =>
+                pk.hostname === newKey.hostname &&
+                pk.ipAddress === newKey.ipAddress
+            );
+            if (!existingNewKey) {
+              mergedKeys.push(newKey);
+            }
+          });
+
+          return mergedKeys;
+        });
+      } else {
+        // Normal load - mask all keys
+        const keyData: ApiKeyInfo[] = serverData.map((server) => ({
+          serverId: server.id,
+          hostname: server.hostname,
+          ipAddress: server.ipAddress,
+          apiKey: '••••••••••••••••••••', // Mask existing keys for security
+          registeredAt: server.registeredAt,
+          isNewlyGenerated: false, // These are existing keys, so mask them
+        }));
+        setApiKeys(keyData);
+      }
     } catch (err) {
       setError('Failed to load servers. Please try again.');
       console.error('Error loading servers:', err);
@@ -81,13 +116,16 @@ const ServerManagement = () => {
       isValid = false;
     }
 
+    // More flexible IP validation - accepts IPv4 addresses and localhost
     const ipRegex =
-      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^localhost$|^127\.0\.0\.1$/;
+
     if (!formData.ipAddress.trim()) {
       errors.ipAddress = 'IP address is required';
       isValid = false;
-    } else if (!ipRegex.test(formData.ipAddress)) {
-      errors.ipAddress = 'Please enter a valid IP address';
+    } else if (!ipRegex.test(formData.ipAddress.trim())) {
+      errors.ipAddress =
+        'Please enter a valid IP address (e.g., 192.168.1.100, localhost, or 127.0.0.1)';
       isValid = false;
     }
 
@@ -120,17 +158,18 @@ const ServerManagement = () => {
       });
 
       const newApiKey: ApiKeyInfo = {
-        serverId: `${formData.hostname}-${Date.now()}`,
+        serverId: response.server_id, // Use the real server ID from the API response
         hostname: formData.hostname,
         ipAddress: formData.ipAddress,
         apiKey: response.apiKey,
         registeredAt: new Date().toISOString(),
+        isNewlyGenerated: true, // Mark as newly generated so we show the real key
       };
 
       setApiKeys((prev) => [newApiKey, ...prev]);
       setSuccess(`Server "${formData.hostname}" registered successfully!`);
       setFormData({ hostname: '', ipAddress: '', description: '' });
-      await loadServers();
+      // Don't reload servers - we already have the new data
     } catch (err) {
       setError(
         err instanceof Error
@@ -144,19 +183,60 @@ const ServerManagement = () => {
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
+    // Check if the text contains masked characters
+    if (text.includes('••••')) {
+      setError('Cannot copy masked API key. Please regenerate the key first.');
+      return;
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          setSuccess('Copied to clipboard!');
+          setTimeout(() => setSuccess(null), 3000);
+        })
+        .catch((err) => {
+          console.error('Clipboard API failed:', err);
+          // Fallback to manual copy
+          fallbackCopyToClipboard(text);
+        });
+    } else {
+      // Fallback for browsers that don't support clipboard API
+      fallbackCopyToClipboard(text);
+    }
+  };
+
+  const fallbackCopyToClipboard = (text: string) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
         setSuccess('Copied to clipboard!');
         setTimeout(() => setSuccess(null), 3000);
-      })
-      .catch(() => {
-        setError('Failed to copy to clipboard');
-      });
+      } else {
+        setError('Failed to copy to clipboard. Please copy manually.');
+      }
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+      setError('Failed to copy to clipboard. Please copy manually.');
+    } finally {
+      document.body.removeChild(textArea);
+    }
   };
 
   const getInstallCommand = (apiKey: string) => {
-    return `curl -sSL https://your-server/install-agent.sh | bash -s -- --api-key="${apiKey}" --server-url="http://localhost:8000"`;
+    // Use the actual server URL from environment or default to localhost
+    const serverUrl = window.location.origin.replace(':3000', ':8000'); // Replace frontend port with backend port
+    return `curl -sSL ${serverUrl}/install-agent.sh | bash -s -- --api-key="${apiKey}" --server-url="${serverUrl}"`;
   };
 
   const handleRegenerateKey = (serverId: string, hostname: string) => {
@@ -183,11 +263,13 @@ const ServerManagement = () => {
       );
       setApiKeys((prev) =>
         prev.map((key) =>
-          key.serverId === serverId ? { ...key, apiKey: response.apiKey } : key
+          key.serverId === serverId
+            ? { ...key, apiKey: response.apiKey, isNewlyGenerated: true }
+            : key
         )
       );
       setSuccess(`API key regenerated successfully for "${hostname}"!`);
-      await loadServers();
+      // Don't reload servers - we already updated the key in state
     } catch (err) {
       setError(
         err instanceof Error
@@ -411,6 +493,10 @@ const ServerManagement = () => {
                         className="btn-icon"
                         onClick={() => copyToClipboard(keyInfo.apiKey)}
                         title="Copy API key"
+                        disabled={
+                          !keyInfo.isNewlyGenerated &&
+                          keyInfo.apiKey.includes('••••')
+                        }
                       >
                         <svg
                           viewBox="0 0 24 24"
@@ -430,6 +516,15 @@ const ServerManagement = () => {
                         </svg>
                       </button>
                     </div>
+                    {!keyInfo.isNewlyGenerated &&
+                      keyInfo.apiKey.includes('••••') && (
+                        <p className="key-note">
+                          <small>
+                            🔒 API key is hidden for security. Regenerate to see
+                            the new key.
+                          </small>
+                        </p>
+                      )}
                     <p className="registered-date">
                       Registered:{' '}
                       {new Date(keyInfo.registeredAt).toLocaleDateString()}
@@ -443,8 +538,15 @@ const ServerManagement = () => {
                         copyToClipboard(getInstallCommand(keyInfo.apiKey))
                       }
                       title="Copy installation command"
+                      disabled={
+                        !keyInfo.isNewlyGenerated &&
+                        keyInfo.apiKey.includes('••••')
+                      }
                     >
-                      Copy Install Command
+                      {!keyInfo.isNewlyGenerated &&
+                      keyInfo.apiKey.includes('••••')
+                        ? 'Regenerate Key First'
+                        : 'Copy Install Command'}
                     </button>
                     <button
                       className="btn btn-warning"

@@ -82,14 +82,14 @@ check_prerequisites() {
         exit 1
     fi
     
-    # Check PostgreSQL
-    if command -v psql &> /dev/null; then
-        PSQL_VERSION=$(psql --version | cut -d' ' -f3)
-        print_success "PostgreSQL $PSQL_VERSION found"
+    # Check PostgreSQL (Docker)
+    if command -v docker &> /dev/null; then
+        print_success "Docker found - will use PostgreSQL container"
     else
-        print_warning "PostgreSQL not found"
-        print_status "Installing PostgreSQL..."
-        install_postgresql
+        print_warning "Docker not found"
+        print_status "Installing Docker is recommended for easier PostgreSQL setup"
+        print_error "Please install Docker and try again"
+        exit 1
     fi
     
     # Check Git
@@ -101,35 +101,31 @@ check_prerequisites() {
     fi
 }
 
-# Install PostgreSQL
+# Install PostgreSQL using Docker
 install_postgresql() {
-    if [[ "$OS" == "linux" ]]; then
-        if command -v apt &> /dev/null; then
-            sudo apt update
-            sudo apt install -y postgresql postgresql-contrib
-        elif command -v yum &> /dev/null; then
-            sudo yum install -y postgresql-server postgresql-contrib
-            sudo postgresql-setup initdb
-        else
-            print_error "Unsupported package manager. Please install PostgreSQL manually."
-            exit 1
-        fi
-        
-        # Start PostgreSQL service
-        sudo systemctl start postgresql
-        sudo systemctl enable postgresql
-        
-    elif [[ "$OS" == "macos" ]]; then
-        if command -v brew &> /dev/null; then
-            brew install postgresql
-            brew services start postgresql
-        else
-            print_error "Homebrew not found. Please install PostgreSQL manually."
-            exit 1
-        fi
+    print_status "Setting up PostgreSQL using Docker..."
+    
+    # Check if Docker is available
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker is required but not installed"
+        print_error "Please install Docker and try again"
+        exit 1
     fi
     
-    print_success "PostgreSQL installed and started"
+    # Start PostgreSQL container
+    docker compose -f docker-compose.dev.yml up -d
+    
+    # Wait for PostgreSQL to be ready
+    print_status "Waiting for PostgreSQL to be ready..."
+    sleep 10
+    
+    # Verify PostgreSQL is running
+    if docker compose -f docker-compose.dev.yml ps | grep -q "Up"; then
+        print_success "PostgreSQL container started successfully"
+    else
+        print_error "Failed to start PostgreSQL container"
+        exit 1
+    fi
 }
 
 # Setup Python virtual environment
@@ -156,16 +152,19 @@ setup_python_env() {
 setup_database() {
     print_status "Setting up PostgreSQL database..."
     
-    # Create database and user
-    sudo -u postgres psql << EOF
-CREATE DATABASE monitoring;
-CREATE USER monitoring_user WITH PASSWORD 'monitoring_pass';
-GRANT ALL PRIVILEGES ON DATABASE monitoring TO monitoring_user;
-ALTER USER monitoring_user CREATEDB;
-\q
-EOF
+    # Wait a bit more for PostgreSQL to be fully ready
+    sleep 5
     
-    print_success "Database setup complete"
+    # Database is already created by Docker container with the right credentials
+    # Just verify the connection works
+    docker compose -f docker-compose.dev.yml exec postgres psql -U monitoring_user -d monitoring -c "SELECT 1;" > /dev/null 2>&1
+    
+    if [ $? -eq 0 ]; then
+        print_success "Database connection verified"
+    else
+        print_error "Database connection failed"
+        exit 1
+    fi
 }
 
 # Setup environment configuration
@@ -174,7 +173,7 @@ setup_environment() {
     
     # Create local environment file
     cat > .env.local << EOF
-# Database Configuration (Local PostgreSQL)
+# Database Configuration (PostgreSQL only)
 DATABASE_URL=postgresql://monitoring_user:monitoring_pass@localhost:5432/monitoring
 POSTGRES_DB=monitoring
 POSTGRES_USER=monitoring_user
@@ -252,14 +251,11 @@ set -e
 
 echo "🚀 Starting development environment..."
 
-# Check if PostgreSQL is running
-if ! pgrep -x "postgres" > /dev/null; then
-    echo "Starting PostgreSQL..."
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        sudo systemctl start postgresql
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        brew services start postgresql
-    fi
+# Start PostgreSQL container if not running
+if ! docker compose -f docker-compose.dev.yml ps | grep -q "Up"; then
+    echo "Starting PostgreSQL container..."
+    docker compose -f docker-compose.dev.yml up -d
+    sleep 5
 fi
 
 # Activate virtual environment
@@ -285,6 +281,7 @@ echo "✅ Development environment started!"
 echo "📊 Dashboard: http://localhost:3000"
 echo "🔧 API Server: http://localhost:8000"
 echo "📖 API Docs: http://localhost:8000/docs"
+echo "🗄️ PostgreSQL: localhost:5432"
 echo ""
 echo "Backend PID: $BACKEND_PID"
 echo "Frontend PID: $FRONTEND_PID"
@@ -292,7 +289,7 @@ echo ""
 echo "Press Ctrl+C to stop all services"
 
 # Wait for interrupt
-trap "echo 'Stopping services...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit 0" INT
+trap "echo 'Stopping services...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; docker compose -f docker-compose.dev.yml stop; exit 0" INT
 wait
 EOF
 
@@ -341,13 +338,37 @@ echo "Resetting database..."
 alembic downgrade base
 alembic upgrade head
 
+# Restart PostgreSQL container to ensure clean state
+echo "Restarting PostgreSQL container..."
+docker compose -f docker-compose.dev.yml restart postgres
+sleep 5
+
 echo "✅ Development environment reset complete!"
+EOF
+
+    # Create stop script
+    cat > scripts/dev-stop.sh << 'EOF'
+#!/bin/bash
+set -e
+
+echo "🛑 Stopping development environment..."
+
+# Stop PostgreSQL container
+echo "Stopping PostgreSQL container..."
+docker compose -f docker-compose.dev.yml stop
+
+# Kill any running backend/frontend processes
+pkill -f "uvicorn server.main:app" || true
+pkill -f "npm run dev" || true
+
+echo "✅ Development environment stopped!"
 EOF
 
     # Make scripts executable
     chmod +x scripts/dev-start.sh
     chmod +x scripts/test-all.sh
     chmod +x scripts/dev-reset.sh
+    chmod +x scripts/dev-stop.sh
     
     print_success "Development scripts created"
 }

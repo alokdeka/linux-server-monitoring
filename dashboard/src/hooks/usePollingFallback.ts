@@ -43,8 +43,9 @@ export const usePollingFallback = (options: UsePollingFallbackOptions = {}) => {
     isPollingRef.current = true;
 
     try {
-      // Get server IDs for metrics refresh
-      const serverIds = servers.map((server) => server.id);
+      // Get current servers from selector (don't use servers from dependency)
+      const currentServers = servers;
+      const serverIds = currentServers.map((server) => server.id);
 
       // Perform polling updates - similar to auto-refresh but for fallback
       const pollingPromises = [
@@ -66,7 +67,7 @@ export const usePollingFallback = (options: UsePollingFallbackOptions = {}) => {
     } finally {
       isPollingRef.current = false;
     }
-  }, [enabled, isAuthenticated, servers, dispatch, onError]);
+  }, [enabled, isAuthenticated, dispatch, onError]);
 
   // Set up polling when WebSocket is disconnected
   useEffect(() => {

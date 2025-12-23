@@ -79,7 +79,12 @@ parse_arguments() {
     
     # Set default agent download URL if not provided
     if [[ -z "$AGENT_DOWNLOAD_URL" ]]; then
-        AGENT_DOWNLOAD_URL="${SERVER_URL}/static/agent"
+        # Try multiple sources for the agent binary
+        GITHUB_RELEASE_URL="https://github.com/alokdeka/linux-server-monitoring/releases/latest/download/monitoring-agent"
+        AGENT_DOWNLOAD_URL="$GITHUB_RELEASE_URL"
+        
+        # Alternative: Use server's static endpoint as fallback
+        # AGENT_DOWNLOAD_URL="${SERVER_URL}/static/monitoring-agent"
     fi
 }
 
@@ -104,6 +109,9 @@ Examples:
   
   # Install via curl (recommended)
   curl -sSL https://your-server/install-agent.sh | bash -s -- --api-key="your-key" --server-url="http://your-server:8000"
+  
+  # With custom agent binary URL
+  curl -sSL https://your-server/install-agent.sh | bash -s -- --api-key="your-key" --server-url="http://your-server:8000" --agent-url="https://github.com/user/repo/releases/latest/download/monitoring-agent"
 
 EOF
 }
@@ -163,34 +171,56 @@ create_directories() {
 install_binary() {
     log_info "Downloading and installing agent binary..."
     
-    # Try to download the agent binary
+    # Try to download the agent binary from multiple sources
+    DOWNLOAD_SUCCESS=false
+    
     if command -v curl >/dev/null 2>&1; then
-        log_info "Downloading agent from: $AGENT_DOWNLOAD_URL"
-        if curl -sSL -f "$AGENT_DOWNLOAD_URL" -o "$INSTALL_DIR/agent"; then
-            log_info "Agent binary downloaded successfully"
+        # Try GitHub releases first
+        log_info "Trying to download from GitHub releases..."
+        if curl -sSL -f "$AGENT_DOWNLOAD_URL" -o "$INSTALL_DIR/monitoring-agent" 2>/dev/null; then
+            log_info "✅ Agent binary downloaded from GitHub releases"
+            DOWNLOAD_SUCCESS=true
         else
-            log_warn "Failed to download agent binary from server"
-            # Fall back to local file if download fails
-            if [[ -f "agent" ]]; then
-                log_info "Using local agent binary"
-                cp agent "$INSTALL_DIR/"
+            log_warn "❌ Failed to download from GitHub releases"
+            
+            # Try server endpoint as fallback
+            SERVER_AGENT_URL="${SERVER_URL}/static/monitoring-agent"
+            log_info "Trying to download from server: $SERVER_AGENT_URL"
+            if curl -sSL -f "$SERVER_AGENT_URL" -o "$INSTALL_DIR/monitoring-agent" 2>/dev/null; then
+                log_info "✅ Agent binary downloaded from server"
+                DOWNLOAD_SUCCESS=true
             else
-                log_error "No agent binary available (neither download nor local file)"
-                exit 1
+                log_warn "❌ Failed to download from server"
             fi
         fi
-    elif [[ -f "agent" ]]; then
-        log_info "Using local agent binary (curl not available)"
-        cp agent "$INSTALL_DIR/"
-    else
-        log_error "Cannot download agent binary (curl not available) and no local file found"
-        exit 1
     fi
     
-    chown "$AGENT_USER:$AGENT_GROUP" "$INSTALL_DIR/agent"
-    chmod 755 "$INSTALL_DIR/agent"
+    # If download failed, check for local file
+    if [[ "$DOWNLOAD_SUCCESS" = false ]]; then
+        if [[ -f "monitoring-agent" ]]; then
+            log_info "📁 Using local agent binary"
+            cp monitoring-agent "$INSTALL_DIR/"
+            DOWNLOAD_SUCCESS=true
+        elif [[ -f "agent" ]]; then
+            log_info "📁 Using local agent binary (legacy name)"
+            cp agent "$INSTALL_DIR/monitoring-agent"
+            DOWNLOAD_SUCCESS=true
+        else
+            log_error "❌ No agent binary available"
+            log_error "   Please ensure one of the following:"
+            log_error "   1. Upload agent binary to GitHub releases"
+            log_error "   2. Host agent binary on your server at /static/monitoring-agent"
+            log_error "   3. Place agent binary file in current directory"
+            log_error "   4. Specify custom URL with --agent-url parameter"
+            exit 1
+        fi
+    fi
     
-    log_info "Agent binary installed to $INSTALL_DIR/agent"
+    # Set permissions
+    chown "$AGENT_USER:$AGENT_GROUP" "$INSTALL_DIR/monitoring-agent"
+    chmod 755 "$INSTALL_DIR/monitoring-agent"
+    
+    log_info "✅ Agent binary installed to $INSTALL_DIR/monitoring-agent"
 }
 
 # Install configuration

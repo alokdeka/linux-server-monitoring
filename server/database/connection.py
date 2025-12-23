@@ -36,8 +36,8 @@ class DatabaseManager:
         )
         
         if not url:
-            # Default to SQLite for local development
-            url = "sqlite:///./monitoring.db"
+            # Default to PostgreSQL for all environments
+            url = "postgresql://monitoring_user:monitoring_pass@localhost:5432/monitoring"
             
         return url
     

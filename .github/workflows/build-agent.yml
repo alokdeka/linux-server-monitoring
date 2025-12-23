@@ -1,0 +1,90 @@
+name: Build and Release Monitoring Agent
+
+on:
+  push:
+    tags:
+      - "v*" # Trigger on version tags like v1.0.0
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  build-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r agent/requirements.txt
+
+      - name: Build agent binary
+        run: |
+          pyinstaller \
+            --onefile \
+            --name monitoring-agent \
+            --distpath dist \
+            --workpath build \
+            --specpath build \
+            --clean \
+            --noconfirm \
+            --console \
+            agent/main.py
+
+      - name: Test binary
+        run: |
+          ls -la dist/
+          file dist/monitoring-agent
+          chmod +x dist/monitoring-agent
+
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: monitoring-agent
+          path: dist/monitoring-agent
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/monitoring-agent
+          body: |
+            ## Monitoring Agent Release
+
+            This release contains the compiled monitoring agent binary for Linux systems.
+
+            ### Installation
+
+            Use the automated installation script:
+
+            ```bash
+            curl -sSL http://your-server:8000/install-agent.sh | bash -s -- \
+              --api-key="YOUR_API_KEY" \
+              --server-url="http://your-server:8000"
+            ```
+
+            ### Manual Installation
+
+            1. Download the `monitoring-agent` binary
+            2. Place it in `/opt/monitoring-agent/`
+            3. Make it executable: `chmod +x /opt/monitoring-agent/monitoring-agent`
+            4. Configure and start the systemd service
+
+            ### Changes
+
+            - Automated system metrics collection
+            - Real-time data transmission to monitoring server
+            - Systemd service integration
+            - Configurable collection intervals
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

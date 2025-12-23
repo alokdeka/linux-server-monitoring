@@ -135,25 +135,17 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-#### Step 2: Database Setup
+#### Step 2: Database Setup (Using Docker PostgreSQL)
 
 ```bash
-# Install PostgreSQL (Ubuntu/Debian)
-sudo apt update
-sudo apt install postgresql postgresql-contrib
+# Start PostgreSQL in Docker (much easier than local installation)
+docker compose -f docker-compose.dev.yml up -d
 
-# Start PostgreSQL service
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
+# Wait for PostgreSQL to be ready
+sleep 5
 
-# Create database and user
-sudo -u postgres psql << EOF
-CREATE DATABASE monitoring;
-CREATE USER monitoring_user WITH PASSWORD 'monitoring_pass';
-GRANT ALL PRIVILEGES ON DATABASE monitoring TO monitoring_user;
-ALTER USER monitoring_user CREATEDB;
-\q
-EOF
+# Verify PostgreSQL is running
+docker compose -f docker-compose.dev.yml ps
 ```
 
 #### Step 3: Environment Configuration
@@ -169,7 +161,7 @@ nano .env.local
 **Configure `.env.local` for local development:**
 
 ```bash
-# Database Configuration (Local PostgreSQL)
+# Database Configuration (PostgreSQL only)
 DATABASE_URL=postgresql://monitoring_user:monitoring_pass@localhost:5432/monitoring
 POSTGRES_DB=monitoring
 POSTGRES_USER=monitoring_user
@@ -541,9 +533,8 @@ Create `.vscode/settings.json`:
 ### Performance Optimization for Development
 
 ```bash
-# Use faster database for development
-# In .env.local, consider using SQLite for faster startup:
-# DATABASE_URL=sqlite:///./monitoring_dev.db
+# Use PostgreSQL for all environments
+# DATABASE_URL=postgresql://monitoring_user:monitoring_pass@localhost:5432/monitoring
 
 # Reduce log verbosity in production testing
 LOG_LEVEL=warning

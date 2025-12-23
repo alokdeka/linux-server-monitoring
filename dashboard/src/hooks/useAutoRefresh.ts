@@ -43,8 +43,9 @@ export const useAutoRefresh = (options: UseAutoRefreshOptions = {}) => {
       // Update last activity
       dispatch(updateLastActivity());
 
-      // Get server IDs for metrics refresh
-      const serverIds = servers.map((server) => server.id);
+      // Get current servers from selector (don't use servers from dependency)
+      const currentServers = servers;
+      const serverIds = currentServers.map((server) => server.id);
 
       // Perform all refresh operations in parallel
       const refreshPromises = [
@@ -66,7 +67,7 @@ export const useAutoRefresh = (options: UseAutoRefreshOptions = {}) => {
     } finally {
       isRefreshingRef.current = false;
     }
-  }, [enabled, isAuthenticated, servers, dispatch, onError]);
+  }, [enabled, isAuthenticated, dispatch, onError]);
 
   // Set up automatic refresh interval
   useEffect(() => {

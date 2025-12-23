@@ -30,9 +30,17 @@ const ServerGrid: React.FC<ServerGridProps> = ({
     error,
   } = useSelector((state: RootState) => state.servers);
 
+  const hasAttemptedFetch = React.useRef(false);
+
   useEffect(() => {
-    // Only fetch servers if we don't have any and we're not already loading
-    if (servers.length === 0 && !loading && !error) {
+    // Only fetch servers once when component mounts
+    if (
+      !hasAttemptedFetch.current &&
+      servers.length === 0 &&
+      !loading &&
+      !error
+    ) {
+      hasAttemptedFetch.current = true;
       dispatch(fetchServers());
     }
   }, [dispatch, servers.length, loading, error]);

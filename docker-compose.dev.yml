@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: monitoring_postgres_dev
+    environment:
+      POSTGRES_DB: monitoring
+      POSTGRES_USER: monitoring_user
+      POSTGRES_PASSWORD: monitoring_pass
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - monitoring_dev_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monitoring_user -d monitoring"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_dev_data:
+    driver: local
+
+networks:
+  monitoring_dev_network:
+    driver: bridge

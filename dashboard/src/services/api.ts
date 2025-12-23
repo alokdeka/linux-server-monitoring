@@ -44,7 +44,7 @@ export interface ApiClient {
   ): Promise<ServerMetrics[]>;
   registerServer(
     serverData: ServerRegistrationData
-  ): Promise<{ apiKey: string }>;
+  ): Promise<{ apiKey: string; server_id: string; key_id: string }>;
   regenerateServerKey(
     serverId: string,
     description?: string
@@ -425,7 +425,7 @@ class ApiClientImpl implements ApiClient {
 
   async registerServer(
     serverData: ServerRegistrationData
-  ): Promise<{ apiKey: string }> {
+  ): Promise<{ apiKey: string; server_id: string; key_id: string }> {
     const response = await this.request<{
       status: string;
       message: string;
@@ -436,13 +436,17 @@ class ApiClientImpl implements ApiClient {
     }>('/api/v1/dashboard/management/servers/register', {
       method: 'POST',
       body: JSON.stringify({
-        server_id: `${serverData.hostname}-${Date.now()}`, // Generate unique server ID
         hostname: serverData.hostname,
         ip_address: serverData.ipAddress,
+        // Don't send server_id - let the backend generate it
       }),
     });
 
-    return { apiKey: response.api_key };
+    return {
+      apiKey: response.api_key,
+      server_id: response.server_id,
+      key_id: response.key_id,
+    };
   }
 
   async regenerateServerKey(

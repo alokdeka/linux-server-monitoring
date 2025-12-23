@@ -361,9 +361,9 @@ def get_limiter():
 def metrics_rate_limit():
     """Rate limit for metrics endpoints - more permissive for legitimate agents."""
     import os
-    # More lenient rate limiting for testing and development
-    if os.getenv("TESTING") == "true" or os.getenv("LOG_LEVEL") == "info":
-        return limiter.limit("1000/minute")
+    # Very high limits for development to prevent issues
+    if os.getenv("TESTING") == "true" or os.getenv("LOG_LEVEL") == "debug":
+        return limiter.limit("10000/minute")  # Extremely high limit for development
     return limiter.limit("300/minute")  # Increased from 100 to 300 for dashboard usage
 
 
@@ -380,11 +380,15 @@ def health_rate_limit():
     """Rate limit for health check endpoints - moderate limits."""
     import os
     # More lenient rate limiting for testing
-    if os.getenv("TESTING") == "true":
-        return limiter.limit("1000/minute")
+    if os.getenv("TESTING") == "true" or os.getenv("LOG_LEVEL") == "debug":
+        return limiter.limit("5000/minute")  # Very high limit for development
     return limiter.limit("60/minute")
 
 
 def general_rate_limit():
     """General rate limit for other endpoints."""
+    import os
+    # More lenient rate limiting for development
+    if os.getenv("TESTING") == "true" or os.getenv("LOG_LEVEL") == "debug":
+        return limiter.limit("5000/minute")  # Very high limit for development
     return limiter.limit("30/minute")

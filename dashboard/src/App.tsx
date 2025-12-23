@@ -61,9 +61,9 @@ function App() {
     (state: RootState) => state.auth
   );
 
-  // Initialize real-time functionality
+  // COMPLETELY DISABLE auto-refresh until we fix the infinite loop
   const { manualRefresh } = useAutoRefresh({
-    enabled: isAuthenticated,
+    enabled: false, // DISABLED
     onError: (error) => {
       console.error('Auto-refresh error:', error);
     },
@@ -82,10 +82,10 @@ function App() {
     },
   });
 
-  // Set up polling fallback for when WebSocket is disconnected
+  // COMPLETELY DISABLE polling fallback until we fix the infinite loop
   usePollingFallback({
-    enabled: isAuthenticated,
-    pollingInterval: 60000, // 60 seconds - slower than normal refresh
+    enabled: false, // DISABLED
+    pollingInterval: 60000,
     onError: (error) => {
       console.error('Polling fallback error:', error);
     },

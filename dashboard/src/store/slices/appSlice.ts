@@ -26,7 +26,7 @@ const initialState: AppState = {
   initialized: true,
   sidebarOpen: true,
   theme: 'light',
-  refreshInterval: 30000, // 30 seconds
+  refreshInterval: 300000, // 5 minutes for development testing
   connectionStatus: 'connected',
   lastActivity: null,
   notifications: {
@@ -121,7 +121,7 @@ const appSlice = createSlice({
       state.refreshInterval = 30000;
       state.sidebarOpen = true;
       state.settings = {
-        refreshInterval: 30000,
+        refreshInterval: 300000, // 5 minutes for development testing
         alertThresholds: { cpu: 80, memory: 85, disk: 90 },
         notifications: { enabled: true, webhookUrls: [] },
         display: { theme: 'light', compactMode: false, chartsEnabled: true },

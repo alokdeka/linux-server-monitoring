@@ -28,27 +28,27 @@ const ServerDetails: React.FC = () => {
   const server = servers.find((s) => s.id === serverId);
   const serverMetrics = serverId ? historical[serverId] || [] : [];
 
+  const hasAttemptedServersFetch = React.useRef(false);
+
   useEffect(() => {
     if (!serverId) {
       navigate('/servers');
       return;
     }
 
-    // Fetch servers if not already loaded
-    if (servers.length === 0 && !serversLoading) {
+    // Fetch servers if not already loaded (only once)
+    if (
+      !hasAttemptedServersFetch.current &&
+      servers.length === 0 &&
+      !serversLoading
+    ) {
+      hasAttemptedServersFetch.current = true;
       dispatch(fetchServers());
     }
 
     // Fetch metrics for the selected time range
     dispatch(fetchServerMetrics({ serverId, timeRange: selectedTimeRange }));
-  }, [
-    dispatch,
-    serverId,
-    selectedTimeRange,
-    servers.length,
-    serversLoading,
-    navigate,
-  ]);
+  }, [dispatch, serverId, selectedTimeRange, navigate]);
 
   useEffect(() => {
     setIsLoading(serversLoading || metricsLoading);

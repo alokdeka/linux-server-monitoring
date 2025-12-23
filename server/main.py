@@ -11,7 +11,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
+import os
 
 from server.api.metrics import metrics_api
 from server.api.dashboard import dashboard_router
@@ -70,6 +72,23 @@ async def websocket_route(websocket: WebSocket, token: str = None,
                          db_session: Session = Depends(get_db_session)):
     """WebSocket endpoint for dashboard real-time updates."""
     await websocket_endpoint(websocket, token, db_session)
+
+
+# Add install script endpoint
+@app.get("/install-agent.sh", response_class=PlainTextResponse)
+async def get_install_script():
+    """Serve the agent installation script."""
+    try:
+        script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "install-agent.sh")
+        with open(script_path, "r") as f:
+            content = f.read()
+        return content
+    except FileNotFoundError:
+        logger.error("Install script not found")
+        return "#!/bin/bash\necho 'Install script not found'\nexit 1"
+    except Exception as e:
+        logger.error(f"Error serving install script: {e}")
+        return "#!/bin/bash\necho 'Error loading install script'\nexit 1"
 
 # Update CORS settings to allow dashboard access
 app.add_middleware(
