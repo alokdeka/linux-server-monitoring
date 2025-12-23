@@ -248,13 +248,13 @@ const ServerManagement = () => {
     }
 
     const serverUrl = `http://${serverHost}:8000`;
-    return `curl -sSL ${serverUrl}/install-agent.sh | bash -s -- --api-key="${apiKey}" --server-url="${serverUrl}"`;
+    return `curl -sSL ${serverUrl}/install-agent.sh | sudo bash -s -- --api-key "${apiKey}" --server-url "${serverUrl}"`;
   };
 
   const getRemoteInstallCommand = (apiKey: string) => {
     // For remote servers, use GitHub for the install script
-    // Replace YOUR_PUBLIC_IP with your actual public IP (e.g., 49.37.103.229) or ngrok URL
-    return `curl -sSL https://raw.githubusercontent.com/alokdeka/linux-server-monitoring/master/install-agent.sh | bash -s -- --api-key="${apiKey}" --server-url="http://YOUR_PUBLIC_IP:8000"`;
+    // Use space-separated format to avoid shell parsing issues
+    return `curl -sSL https://raw.githubusercontent.com/alokdeka/linux-server-monitoring/master/install-agent.sh | sudo bash -s -- --api-key "${apiKey}" --server-url "http://YOUR_PUBLIC_IP:8000"`;
   };
 
   const handleRegenerateKey = (serverId: string, hostname: string) => {
